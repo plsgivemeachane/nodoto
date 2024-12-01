@@ -1,7 +1,8 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { RequestMonitor, RequestEvent } from './RequestMonitor';
 import { HTTPServer } from '../HTTPServer';
 import { logger } from '../../utils/winston';
+import Utils from '../../utils/utils';
 
 /**
  * Extended request event interface that includes timeout-specific information.
@@ -53,19 +54,42 @@ export class TimeoutMonitor extends RequestMonitor {
      * @param res - Express Response object
      */
     protected handleRequest(req: Request, res: Response): void {
-        const requestId = this.generateRequestId(req);
+        const requestId = Utils.snowflakeId();
+
+        logger.verbose({
+            message: '[Timeout] Incoming request ' + requestId
+        });
+
+        // Save original response methods
+        const originalJson = res.json.bind(res);
+        const originalSend = res.send.bind(res);
+
+        // Override response methods to cleanup timeouts
+        res.json = (...args: any[]) => {
+            this.cleanup(req, res, requestId);
+            return originalJson(...args);
+        };
+        
+        res.send = (...args: any[]) => {
+            this.cleanup(req, res, requestId);
+            return originalSend(...args);
+        };
+
         this.startTimes.set(requestId, Date.now());
 
         const timeoutDuration = HTTPServer.config.timeout || 30000;
         const timeoutId = setTimeout(() => {
-            this.handleTimeout(req, res, requestId, timeoutDuration);
+            // Double-check if the request has not been completed
+            if (this.timeouts.has(requestId)) {
+                this.handleTimeout(req, res, requestId, timeoutDuration);
+            }
         }, timeoutDuration);
 
         this.timeouts.set(requestId, timeoutId);
 
         // Cleanup handlers
-        res.on('finish', () => this.cleanup(req, res));
-        req.on('close', () => this.cleanup(req, res));
+        res.on('finish', () => this.cleanup(req, res, requestId));
+        res.on('close', () => this.cleanup(req, res, requestId));
     }
 
     /**
@@ -74,8 +98,7 @@ export class TimeoutMonitor extends RequestMonitor {
      * @param req - Express Request object
      * @param res - Express Response object
      */
-    protected cleanup(req: Request, res: Response): void {
-        const requestId = this.generateRequestId(req);
+    protected cleanup(req: Request, res: Response, requestId: string): void {
         const timeoutId = this.timeouts.get(requestId);
         
         if (timeoutId) {
@@ -95,7 +118,13 @@ export class TimeoutMonitor extends RequestMonitor {
      */
     private handleTimeout(req: Request, res: Response, requestId: string, timeoutDuration: number): void {
         const startTime = this.startTimes.get(requestId);
-        if (!startTime) return;
+        if (!startTime) {
+            logger.warn({
+                message: '[Timeout] Request timed out, but start time not found',
+                requestId
+            });
+            return;
+        }
 
         const duration = Date.now() - startTime;
         const event = this.createTimeoutEvent(req, duration, timeoutDuration);
@@ -120,7 +149,7 @@ export class TimeoutMonitor extends RequestMonitor {
         }
 
         // Cleanup
-        this.cleanup(req, res);
+        this.cleanup(req, res, requestId);
     }
 
     /**
@@ -138,22 +167,13 @@ export class TimeoutMonitor extends RequestMonitor {
     }
 
     /**
-     * Generates a unique identifier for a request.
-     * @param req - Express Request object
-     * @returns Unique request identifier
-     */
-    private generateRequestId(req: Request): string {
-        return `${req.method}-${req.url}-${Date.now()}`;
-    }
-
-    /**
      * Express middleware function for request timeout monitoring.
      * @param req - Express Request object
      * @param res - Express Response object
      * @param next - Express NextFunction
      */
-    public static middleware(req: Request, res: Response, next: Function): void {
+    public static middleware(req: Request, res: Response, next?: NextFunction): void {
         TimeoutMonitor.getInstance().handleRequest(req, res);
-        next();
+        next?.();
     }
 }

@@ -27,7 +27,7 @@ export default class InjectableRequest {
     public addRoutePossibleReturn(route: routeReturnFunction) {
         this.routes.push(async (req, res, next) => {
             try {
-                const result = await Promise.resolve(route(req, res, next));
+                const result = await Promise.resolve(await route(req, res, next));
                 if (typeof result === 'boolean') {
                     return result;
                 } else {
@@ -52,10 +52,7 @@ export default class InjectableRequest {
             logger.verbose(`[HTTP] Incoming ${req.method} request to ${req.url} from ${req.ip}`)
             try {
                 for(let route of this.routes) {
-                    let result = route(req, res, next)
-                    if(result && result instanceof Promise) {
-                        result = await result;
-                    }
+                    let result = await route(req, res, next);
                     if(!result) {
                         logger.verbose(`[HTTP] Request processing halted by middleware or handler`)
                         return;

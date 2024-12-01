@@ -15,7 +15,7 @@ export default class RouteGroup {
     public route(...routes: (Route | RouteGroup)[]) { 
         for(let route of routes) {
             if(route instanceof Route) {
-                logger.verbose(`[Router] Registering endpoint: ${route.getMethod().toUpperCase()} ${this.path}${route.getRoute()}`)
+                logger.verbose(`[Router] Registering endpoint: ${route.getMethod().toUpperCase()} ${this.path}${route.getRoute() == "/" ? "" : route.getRoute()}`)
                 this.router[route.getMethod()](route.getRoute(), route.getHandler())
             } else {
                 logger.verbose(`[Router] Mounting route group at path: ${this.path}${route.getPath()}`)

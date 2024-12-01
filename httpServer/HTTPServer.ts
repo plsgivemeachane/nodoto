@@ -15,6 +15,7 @@ export class HTTPServer {
     private static instance: HTTPServer;
     private static readonly observable: Observable<string> = new Observable<string>();
     public static config: HTTPServerConfig;
+    
     private constructor(config: HTTPServerConfig) {
         this.routes = [];
         this.port = config.port ? config.port : 8080;

@@ -16,7 +16,7 @@ export interface RequestEvent {
     /** Unix timestamp when the request was received */
     timestamp: number;
     /** Client's IP address */
-    ip: string;
+    ip?: string;
     /** Request headers */
     headers: any;
 }
@@ -72,7 +72,7 @@ export abstract class RequestMonitor {
      * @param req - Express Request object
      * @param res - Express Response object
      */
-    protected abstract handleRequest(req: Request, res: Response): void;
+    protected abstract handleRequest(req: Request, res: Response, requestId: string): void;
 
     /**
      * Abstract method to clean up resources after request completion.
@@ -80,5 +80,5 @@ export abstract class RequestMonitor {
      * @param req - Express Request object
      * @param res - Express Response object
      */
-    protected abstract cleanup(req: Request, res: Response): void;
+    protected abstract cleanup(req: Request, res: Response, requestId: string): void;
 }

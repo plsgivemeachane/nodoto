@@ -1,0 +1,85 @@
+# 🐛 Bug Log
+
+## [BUG-001] TimeoutMonitor Response Handling Issue
+**Date**: 2024-12-01
+**Status**: Open
+**Priority**: High
+**Component**: TimeoutMonitor
+
+### Error Stack
+```
+Error: Cannot set headers after they are sent to the client
+    at ServerResponse.setHeader (node:_http_outgoing:703:11)
+    at ServerResponse.header (express\lib\response.js:794:10)
+    at ServerResponse.send (express\lib\response.js:174:12)
+    at ServerResponse.res.send (TimeoutMonitor.ts:75:20)
+```
+
+### Reproduction
+1. Run `ts-node ./examples/helloworld/index.ts`
+2. Access http://localhost:3000
+3. Observe error in console:
+```
+<2024-12-01 23:26:33> [verbose]: [Router] Registering endpoint: GET /
+<2024-12-01 23:26:33> [info]: [Server] HTTP server started and listening on port 3000
+<2024-12-01 23:26:33> [verbose]: [HTTP] Incoming GET request to / from ::ffff:127.0.0.1
+<2024-12-01 23:26:33> [verbose]: [Timeout] Incoming request 7188862459001131008
+<2024-12-01 23:26:33> [info]: [Example] Processing request with 1 second delay
+[2024-12-01 23:26:34] [error]: Error: Cannot set headers after they are sent to the client
+```
+
+### Problem Description
+1. Response methods are being called multiple times
+2. Timeout cleanup is not preventing subsequent response attempts
+3. Method override chain is causing recursive calls
+
+### Affected Files
+- `httpServer/monitoring/TimeoutMonitor.ts`
+  - Method override implementation (lines 65-80)
+  - Response handling logic
+
+### Current Implementation Issues
+1. Response method overrides are causing recursive calls
+2. Cleanup timing is not properly synchronized
+3. Method binding may be creating multiple wrapper layers
+
+### Proposed Solution Structure
+```typescript
+class TimeoutMonitor {
+    private responseSent = new Map<string, boolean>();
+    
+    protected handleRequest(req: Request, res: Response): void {
+        const requestId = Utils.snowflakeId();
+        this.responseSent.set(requestId, false);
+        
+        // Wrap response methods once
+        const wrappedMethods = this.wrapResponseMethods(res, requestId);
+        Object.assign(res, wrappedMethods);
+        
+        // ... rest of the implementation
+    }
+    
+    private wrapResponseMethods(res: Response, requestId: string) {
+        // Implement proper method wrapping
+    }
+}
+```
+
+### Next Steps
+1. Review Express.js response handling flow
+2. Analyze method binding and prototype chain
+3. Consider alternative timeout tracking approaches
+4. Test with various response scenarios
+
+### Related Components
+- InjectableRequest
+- Route handling
+- Express middleware chain
+
+### Environment
+- Node.js/Express
+- TypeScript
+- express@4.18.2
+
+### Temporary Workaround
+Disable timeout monitoring (`{ timeout: false }`) until fix is implemented.
