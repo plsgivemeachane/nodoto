@@ -5,17 +5,33 @@ import { logger } from "../utils/winston";
 import RouteGroup from "./routing/RouteGroup";
 import Observable from "../utils/Observable";
 import dotenv from "dotenv";
+import HTTPServerConfig from "./HTTPConfig";
+import cors from 'cors'
 dotenv.config();
 
 export class HTTPServer {
     private readonly routes: (Route | RouteGroup)[];
     public port: number;
-
+    private static instance: HTTPServer;
     private static readonly observable: Observable<string> = new Observable<string>();
-
-    constructor() {
+    private readonly config: HTTPServerConfig;
+    private constructor(config: HTTPServerConfig) {
         this.routes = [];
-        this.port = process.env.API_SERVER_PORT ? parseInt(process.env.API_SERVER_PORT) : 8080;
+        this.port = config.port ? config.port : 8080;
+        this.config = config;
+    }
+
+
+    public static init(config: HTTPServerConfig): HTTPServer {
+        HTTPServer.instance = new HTTPServer(config);
+        return HTTPServer.instance;
+    }
+
+    public static getInstance(): HTTPServer {
+        if (!HTTPServer.instance) {
+            throw new Error("[HTTPServer] HTTP server has not been initialized. Please call HTTPServer.init() first.");
+        }
+        return HTTPServer.instance;
     }
 
     public setLoggerLevel(level: string) {
@@ -34,7 +50,9 @@ export class HTTPServer {
         const app = express();
         const server = http.createServer(app);
         // Middleware
-        app.use(express.json());
+        if(this.config.useJsonParser) app.use(express.json());
+        if(this.config.useUrlParser) app.use(express.urlencoded({ extended: true }));
+        if(this.config.corsSetting) app.use(cors(this.config.corsSetting));
 
         const root = new RouteGroup("/")
         for(let route of this.routes) {
