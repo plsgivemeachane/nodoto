@@ -14,11 +14,11 @@ export class HTTPServer {
     public port: number;
     private static instance: HTTPServer;
     private static readonly observable: Observable<string> = new Observable<string>();
-    private readonly config: HTTPServerConfig;
+    public static config: HTTPServerConfig;
     private constructor(config: HTTPServerConfig) {
         this.routes = [];
         this.port = config.port ? config.port : 8080;
-        this.config = config;
+        HTTPServer.config = config;
         this.setLoggerLevel(config.logLevel ? config.logLevel : "info")
     }
 
@@ -42,6 +42,12 @@ export class HTTPServer {
         this.routes.push(route);
     }
 
+        /**
+         * Starts the HTTP server.
+         * 
+         * The server will listen on the configured port and will serve all configured routes.
+         * If no routes have been configured, an error will be thrown.
+         */
     public start() {
         if(this.routes.length == 0) {
             throw new Error("[HTTPServer] Cannot start server: No routes have been configured. Please add at least one route using addRoute() before starting the server.")
@@ -50,19 +56,9 @@ export class HTTPServer {
         const app = express();
         const server = http.createServer(app);
         // Middleware
-        if(this.config.useJsonParser) app.use(express.json());
-        if(this.config.useUrlParser) app.use(express.urlencoded({ extended: true }));
-        if(this.config.corsSetting) app.use(cors(this.config.corsSetting));
-
-        if(this.config.timeout) {
-            app.use((req, res, next) => {
-                req.setTimeout(this.config.timeout, () => {
-                    logger.warn(`[HTTP] Request timed out: ${req.method} ${req.url}`);
-                    res.status(408).send('Request timed out');
-                });
-                next();
-            });
-        }
+        if(HTTPServer.config.useJsonParser) app.use(express.json());
+        if(HTTPServer.config.useUrlParser) app.use(express.urlencoded({ extended: true }));
+        if(HTTPServer.config.corsSetting) app.use(cors(HTTPServer.config.corsSetting));
 
         const root = new RouteGroup("/")
         for(let route of this.routes) {

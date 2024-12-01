@@ -1,8 +1,8 @@
 import * as express from 'express'
 import { logger } from '../../utils/winston'
 
-export type routeFunction = (req: express.Request, res: express.Response) => (Promise<boolean> | boolean)
-export type routeReturnFunction = (req: express.Request, res: express.Response) => (Promise<void | any> | void | any)
+export type routeFunction = (req: express.Request, res: express.Response, next?: express.NextFunction) => (Promise<boolean> | boolean)
+export type routeReturnFunction = (req: express.Request, res: express.Response, next?: express.NextFunction) => (Promise<void | any> | void | any)
 
 export default class InjectableRequest {
     private routes: (routeFunction)[]
@@ -25,9 +25,9 @@ export default class InjectableRequest {
     }
 
     public addRoutePossibleReturn(route: routeReturnFunction) {
-        this.routes.push(async (req, res) => {
+        this.routes.push(async (req, res, next) => {
             try {
-                const result = await Promise.resolve(route(req, res));
+                const result = await Promise.resolve(route(req, res, next));
                 if (typeof result === 'boolean') {
                     return result;
                 } else {
@@ -48,11 +48,11 @@ export default class InjectableRequest {
      * @returns An asynchronous function that takes an Express request and response object, logging the request details and executing all routes.
      */
     public getHandler() {
-        return async (req: express.Request, res: express.Response) => {
+        return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
             logger.verbose(`[HTTP] Incoming ${req.method} request to ${req.url} from ${req.ip}`)
             try {
                 for(let route of this.routes) {
-                    let result = route(req, res)
+                    let result = route(req, res, next)
                     if(result && result instanceof Promise) {
                         result = await result;
                     }
