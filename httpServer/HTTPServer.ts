@@ -19,8 +19,8 @@ export class HTTPServer {
         this.routes = [];
         this.port = config.port ? config.port : 8080;
         this.config = config;
+        this.setLoggerLevel(config.logLevel ? config.logLevel : "info")
     }
-
 
     public static init(config: HTTPServerConfig): HTTPServer {
         HTTPServer.instance = new HTTPServer(config);
@@ -53,6 +53,16 @@ export class HTTPServer {
         if(this.config.useJsonParser) app.use(express.json());
         if(this.config.useUrlParser) app.use(express.urlencoded({ extended: true }));
         if(this.config.corsSetting) app.use(cors(this.config.corsSetting));
+
+        if(this.config.timeout) {
+            app.use((req, res, next) => {
+                req.setTimeout(this.config.timeout, () => {
+                    logger.warn(`[HTTP] Request timed out: ${req.method} ${req.url}`);
+                    res.status(408).send('Request timed out');
+                });
+                next();
+            });
+        }
 
         const root = new RouteGroup("/")
         for(let route of this.routes) {

@@ -37,8 +37,19 @@ export default class Middlewares {
         return true
     }
 
+    public static timeoutHandler(req: express.Request, res: express.Response) {
+        logger.verbose(`[Timeout] Request timed out: ${req.method} ${req.url}`)
+        res.status(408).send('Request timed out');
+    }
+
+    //* Config in Route.ts after adding method to middleware
+
     public static auth(route: Route) {
         route.route(this.authUserUsingJWT)
+    }
+
+    public static timeout(route: Route) {
+        route.route(this.timeout)
     }
 
 }
