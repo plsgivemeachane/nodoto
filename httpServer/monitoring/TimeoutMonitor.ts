@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { RequestMonitor, RequestEvent } from './RequestMonitor';
+import { RequestMonitor } from './RequestMonitor';
 import { HTTPServer } from '../HTTPServer';
 import { logger } from '../../utils/winston';
 import Utils from '../../utils/utils';
+import { RequestEvent } from './ReuqestEvent';
 
 /**
  * Extended request event interface that includes timeout-specific information.

@@ -12,23 +12,19 @@ import InjectableRequest, { routeFunction } from "../request/InjectableRequest";
 import Middlewares from "./Middleware";
 import { RequestType } from "../request/RequestType";
 
-interface Middleware {
-    auth?: boolean,
-    timeout?: boolean
-}
-
 export default class Route {
     private readonly path: string; // private readonly = const
     private readonly method: RequestType;
     private readonly handler: InjectableRequest;
 
-    constructor(route: string, method: RequestType, middleware: Middleware = {}) {
+    constructor(route: string, method: RequestType) {
         this.path = route;
         this.handler = new InjectableRequest();
         this.method = method;
 
-        if(middleware.auth) Middlewares.auth(this)
-        if(middleware.timeout) Middlewares.timeout(this)
+        //! Derpicated. Using route function
+        // if(middleware.auth) Middlewares.auth(this)
+        // if(middleware.timeout) Middlewares.timeout(this)
 
         return this;
     }

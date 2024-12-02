@@ -36,11 +36,11 @@ export default class Middlewares {
 
     //* Config in Route.ts after adding method to middleware
 
-    public static auth(route: Route) {
-        route.route(this.authUserUsingJWT)
+    public static auth() {
+        return this.authUserUsingJWT;
     }
 
-    public static timeout(route: Route) {
-        route.route(TimeoutMonitor.middleware)
+    public static timeout() {
+        return TimeoutMonitor.middleware;
     }
 }

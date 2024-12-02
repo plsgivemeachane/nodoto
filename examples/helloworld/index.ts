@@ -1,5 +1,6 @@
 import { HTTPServer } from '../../httpServer/HTTPServer';
 import { RequestType } from '../../httpServer/request/RequestType';
+import Middlewares from '../../httpServer/routing/Middleware';
 import Route from '../../httpServer/routing/Route';
 import Utils from '../../utils/utils';
 import { logger } from '../../utils/winston';
@@ -20,11 +21,13 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 
 // Create a simple Hello World route
-const helloRoute = new Route('/', RequestType.GET, { timeout: true })
+const helloRoute = new Route('/', RequestType.GET)
+.route(Middlewares.timeout())
+//TODO: Stop processing request after timed out --> Provide a way to stop processing, or inject the response .json, send, status object by wrapped it with custom response
 .route(async (req, res) => {
     try {
-        logger.info('[Example] Processing request with 1 second delay');
-        await Utils.sleep(1000); // Simulate some work
+        logger.info('[Example] Processing request with 10 second delay');
+        await Utils.sleep(10000); // Simulate some work
         res.status(200).json({
             message: 'Hello, World! Welcome to nodoto server.',
             timestamp: Date.now()
