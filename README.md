@@ -1,6 +1,7 @@
 # Nodoto
 
 A Express wrapper that makes your life easier with a bunch of built-in features. Nodoto provides a simplified way to build robust Express applications with pre-configured essential features.
+__shh you don't even need it...__
 
 ## Features
 
