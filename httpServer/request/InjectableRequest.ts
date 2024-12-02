@@ -2,7 +2,7 @@ import * as express from 'express'
 import { logger } from '../../utils/winston'
 
 export type routeFunction = (req: express.Request, res: express.Response, next?: express.NextFunction) => (Promise<boolean> | boolean)
-export type routeReturnFunction = (req: express.Request, res: express.Response, next?: express.NextFunction) => (Promise<void | any> | void | any)
+// export type routeReturnFunction = (req: express.Request, res: express.Response, next?: express.NextFunction) => (Promise<void | any> | void | any)
 
 export default class InjectableRequest {
     private routes: (routeFunction)[]
@@ -24,21 +24,21 @@ export default class InjectableRequest {
         return this
     }
 
-    public addRoutePossibleReturn(route: routeReturnFunction) {
-        this.routes.push(async (req, res, next) => {
-            try {
-                const result = await Promise.resolve(await route(req, res, next));
-                if (typeof result === 'boolean') {
-                    return result;
-                } else {
-                    return true;
-                }
-            } catch (error) {
-                return false;
-            }
-        });
-        return this
-    }
+    // public addRoutePossibleReturn(route: routeReturnFunction) {
+    //     this.routes.push(async (req, res, next) => {
+    //         try {
+    //             const result = await Promise.resolve(await route(req, res, next));
+    //             if (typeof result === 'boolean') {
+    //                 return result;
+    //             } else {
+    //                 return true;
+    //             }
+    //         } catch (error) {
+    //             return false;
+    //         }
+    //     });
+    //     return this
+    // }
 
     /**
      * Returns a handler function that processes incoming HTTP requests.
@@ -51,8 +51,12 @@ export default class InjectableRequest {
         return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
             logger.verbose(`[HTTP] Incoming ${req.method} request to ${req.url} from ${req.ip}`)
             try {
+                logger.debug(`[HTTP] Processing over ${this.routes.length} routes`)
                 for(let route of this.routes) {
                     let result = await route(req, res, next);
+                    if(typeof result !== 'boolean') {
+                        throw new Error("[HTTP] Route must return a boolean value")
+                    }
                     if(!result) {
                         logger.verbose(`[HTTP] Request processing halted by middleware or handler`)
                         return;

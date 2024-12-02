@@ -8,7 +8,7 @@ Middleware (Also the route handler itself) is an InjectableRequest
     - middleware: InjectableRequest
     - method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH"
 */
-import InjectableRequest, { routeFunction, routeReturnFunction } from "../request/InjectableRequest";
+import InjectableRequest, { routeFunction } from "../request/InjectableRequest";
 import Middlewares from "./Middleware";
 import { RequestType } from "../request/RequestType";
 
@@ -33,8 +33,8 @@ export default class Route {
         return this;
     }
 
-    public route(fn: routeReturnFunction | routeFunction) {
-        this.handler.addRoutePossibleReturn(fn);
+    public route(fn: routeFunction) {
+        this.handler.addRoute(fn);
         return this;
     }
 

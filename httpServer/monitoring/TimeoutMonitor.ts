@@ -60,20 +60,20 @@ export class TimeoutMonitor extends RequestMonitor {
             message: '[Timeout] Incoming request ' + requestId
         });
 
-        // Save original response methods
-        const originalJson = res.json.bind(res);
-        const originalSend = res.send.bind(res);
+        // // Save original response methods
+        // const originalJson = res.json.bind(res);
+        // const originalSend = res.send.bind(res);
 
-        // Override response methods to cleanup timeouts
-        res.json = (...args: any[]) => {
-            this.cleanup(req, res, requestId);
-            return originalJson(...args);
-        };
+        // // Override response methods to cleanup timeouts
+        // res.json = (...args: any[]) => {
+        //     this.cleanup(req, res, requestId);
+        //     return originalJson(...args);
+        // };
         
-        res.send = (...args: any[]) => {
-            this.cleanup(req, res, requestId);
-            return originalSend(...args);
-        };
+        // res.send = (...args: any[]) => {
+        //     this.cleanup(req, res, requestId);
+        //     return originalSend(...args);
+        // };
 
         this.startTimes.set(requestId, Date.now());
 
@@ -99,6 +99,7 @@ export class TimeoutMonitor extends RequestMonitor {
      * @param res - Express Response object
      */
     protected cleanup(req: Request, res: Response, requestId: string): void {
+        logger.debug(`[Timeout] Cleaning up request ${requestId}`);
         const timeoutId = this.timeouts.get(requestId);
         
         if (timeoutId) {
@@ -117,6 +118,9 @@ export class TimeoutMonitor extends RequestMonitor {
      * @param timeoutDuration - Duration after which the request timed out
      */
     private handleTimeout(req: Request, res: Response, requestId: string, timeoutDuration: number): void {
+
+        logger.debug(`[Timeout] Request ${requestId} timed out`);
+
         const startTime = this.startTimes.get(requestId);
         if (!startTime) {
             logger.warn({
@@ -172,8 +176,8 @@ export class TimeoutMonitor extends RequestMonitor {
      * @param res - Express Response object
      * @param next - Express NextFunction
      */
-    public static middleware(req: Request, res: Response, next?: NextFunction): void {
+    public static middleware(req: Request, res: Response): boolean{
         TimeoutMonitor.getInstance().handleRequest(req, res);
-        next?.();
+        return true;
     }
 }

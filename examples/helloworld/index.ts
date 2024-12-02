@@ -7,18 +7,16 @@ import { logger } from '../../utils/winston';
 // Initialize utils
 Utils.init();
 
-// Create server configuration
-const config = {
+// Initialize HTTP server
+HTTPServer.init({
     port: 3000,
     timeout: 5000, // 5 seconds timeout
-    cors: {
-        enabled: true,
-        origin: '*'
-    }
-};
-
-// Initialize HTTP server
-HTTPServer.init(config);
+    // cors: {
+    //     enabled: true,
+    //     origin: '*'
+    // },
+    logLevel: 'debug'
+});
 const server = HTTPServer.getInstance();
 
 // Create a simple Hello World route
