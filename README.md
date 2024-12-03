@@ -26,10 +26,49 @@ __shh you don't even need it...__
 npm install nodoto
 ```
 
-## Quick Start
+## Quick Start (Not really quick actually lol!)
 
 ```javascript
+import { HTTPServer } from '../../httpServer/HTTPServer';
+import { RequestType } from '../../httpServer/request/RequestType';
+import Middlewares from '../../httpServer/routing/Middleware';
+import Route from '../../httpServer/routing/Route';
+import Utils from '../../utils/utils';
+import { logger } from '../../utils/winston';
 
+// Initialize utils
+Utils.init();
+
+// Initialize HTTP server
+HTTPServer.init({
+    port: 3000,
+    timeout: 5000, // 5 seconds timeout
+    // cors: {
+    //     enabled: true,
+    //     origin: '*'
+    // },
+    logLevel: 'debug'
+});
+const server = HTTPServer.getInstance();
+
+// Create a simple Hello World route
+const helloRoute = new Route('/', RequestType.GET)
+.route(Middlewares.timeout())
+.route(async (req, res) => {
+    logger.info('[Example] Processing request with 10 second delay');
+    await Utils.sleep(10000); // Simulate some work
+    res.status(200).json({ // This never gets called
+        message: 'Hello, World! Welcome to nodoto server.',
+        timestamp: Date.now()
+    });
+    return true; // Must return true to continue the chain
+});
+
+// Add route to server
+server.addRoute(helloRoute);
+
+// Start the server
+server.start()
 ```
 
 ## Scripts

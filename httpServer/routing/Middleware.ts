@@ -4,16 +4,18 @@ import Route from "./Route";
 import { JWT } from 'quanvnjwt'
 import dotenv from 'dotenv'
 dotenv.config()
-import { TimeoutMonitor } from '../monitoring/TimeoutMonitor';
+import {  } from '../monitoring/TimeoutMonitor';
+import NResponse from '../request/wrapper/NResponse';
+import NRequest from '../request/wrapper/NRequest';
 
 export default class Middlewares {
 
-    public static authUserUsingJWT(req: express.Request, res: express.Response, next?: express.NextFunction) {
-        logger.verbose(`[Auth] Validating JWT token for ${req.method} ${req.url}`)
-        const token = req.headers.authorization
+    public static authUserUsingJWT(req: NRequest, res: NResponse) {
+        logger.verbose(`[Auth] Validating JWT token for ${req.getRequest().method} ${req.getRequest().url}`)
+        const token = req.getRequest().headers.authorization
         if (!token) {
-            logger.warn(`[Auth] No token provided for ${req.method} ${req.url}`)
-            res.status(401).send('No token provided')
+            logger.warn(`[Auth] No token provided for ${req.getRequest().method} ${req.getRequest().url}`)
+            res.send('No token provided', 401)
             return false
         }
 
@@ -21,16 +23,15 @@ export default class Middlewares {
             const jwt = new JWT(process.env.JWT_SECRET || '')
             const decoded = jwt.verify(token)
             if (!decoded) {
-                logger.warn(`[Auth] Invalid token provided for ${req.method} ${req.url}`)
-                res.status(401).send('Invalid token')
+                logger.warn(`[Auth] Invalid token provided for ${req.getRequest().method} ${req.getRequest().url}`)
+                res.send('Invalid token', 401)
                 return false
             }
-            next?.()
-            return true
+            return true // == next
         } catch (error) {
             logger.error(`[Auth] Error validating token: ${error}`)
-            res.status(401).send('Invalid token')
-            return false
+            res.send('Invalid token', 401)
+            return false // Stop processing
         }
     }
 

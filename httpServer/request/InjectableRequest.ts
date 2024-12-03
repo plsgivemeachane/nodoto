@@ -1,7 +1,9 @@
 import * as express from 'express'
 import { logger } from '../../utils/winston'
+import NRequest from './wrapper/NRequest'
+import NResponse from './wrapper/NResponse'
 
-export type routeFunction = (req: express.Request, res: express.Response, next?: express.NextFunction) => (Promise<boolean> | boolean)
+export type routeFunction = (req: NRequest, res: NResponse) => (Promise<boolean> | boolean)
 // export type routeReturnFunction = (req: express.Request, res: express.Response, next?: express.NextFunction) => (Promise<void | any> | void | any)
 
 export default class InjectableRequest {
@@ -53,7 +55,7 @@ export default class InjectableRequest {
             try {
                 logger.debug(`[HTTP] Processing over ${this.routes.length} routes`)
                 for(let route of this.routes) {
-                    let result = await route(req, res, next);
+                    let result = await route(new NRequest(req), new NResponse(res));
                     if(typeof result !== 'boolean') {
                         throw new Error("[HTTP] Route must return a boolean value")
                     }

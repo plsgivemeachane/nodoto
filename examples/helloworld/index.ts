@@ -27,14 +27,14 @@ const helloRoute = new Route('/', RequestType.GET)
 .route(async (req, res) => {
     try {
         logger.info('[Example] Processing request with 10 second delay');
-        await Utils.sleep(10000); // Simulate some work
-        res.status(200).json({
+        await Utils.sleep(1000); // Simulate some work
+        res.send({
             message: 'Hello, World! Welcome to nodoto server.',
             timestamp: Date.now()
         });
     } catch (error) {
         logger.error('[Example] Error processing request:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.send({ error: 'Internal Server Error' });
     }
     return true; // Must return true to continue the chain
 });
