@@ -1,20 +1,26 @@
+import { logger } from "../../../../utils/winston";
 import NRequest from "../../../request/wrapper/NRequest";
 import { RequestEvent } from "../../RequestEvent";
 import Event from "../Event";
+import { AbstractRequestHandler } from "../handler/AbstractRequestHandler";
 
-export default class RequestFinishEvent extends Event {
+export default class RequestFinishEvent extends Event<AbstractRequestHandler> {
+    getRequestId(event: RequestEvent): string {
+        throw new Error("Method not implemented.");
+    }
+    getOrCreateHandler(requestId: string): AbstractRequestHandler {
+        throw new Error("Method not implemented.");
+    }
+    cleanupHandler(requestId: string): void {
+        throw new Error("Method not implemented.");
+    }
     name: string = 'request_finish';
-    timestamp: number = Date.now();
 
     constructor(data?: any) {
-        super('request_finish', data);
+        super(data);
     }
 
-    getReqestEvent(req: NRequest): RequestEvent {
-        return {
-            request: req,
-            event: this,
-            timestamp: this.timestamp
-        };
+    public onEvent(event: RequestEvent): void {
+        logger.debug(event.event);
     }
 }

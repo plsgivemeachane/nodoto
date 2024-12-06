@@ -4,19 +4,19 @@ import Route from "./Route";
 import { JWT } from 'quanvnjwt'
 import dotenv from 'dotenv'
 dotenv.config()
-import {  } from '../monitoring/TimeoutMonitor';
 import NResponse from '../request/wrapper/NResponse';
 import NRequest from '../request/wrapper/NRequest';
+import type { routeFunction } from '../request/InjectableRequest';
 
 export default class Middlewares {
 
-    public static authUserUsingJWT(req: NRequest, res: NResponse) {
+    public static authUserUsingJWT: routeFunction = async (req: NRequest, res: NResponse) => {
         logger.verbose(`[Auth] Validating JWT token for ${req.getRequest().method} ${req.getRequest().url}`)
         const token = req.getRequest().headers.authorization
         if (!token) {
             logger.warn(`[Auth] No token provided for ${req.getRequest().method} ${req.getRequest().url}`)
             res.send('No token provided', 401)
-            return false
+            return false // Stop processing
         }
 
         try {
@@ -41,7 +41,7 @@ export default class Middlewares {
         return this.authUserUsingJWT;
     }
 
-    public static timeout() {
-        return TimeoutMonitor.middleware;
-    }
+    // public static timeout() {
+    //     return TimeoutMonitor.middleware;
+    // }
 }

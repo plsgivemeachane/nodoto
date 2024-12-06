@@ -1,4 +1,5 @@
 import NRequest from "../request/wrapper/NRequest";
+import NResponse from "../request/wrapper/NResponse";
 import Event from "./event/Event";
 
 /**
@@ -6,7 +7,8 @@ import Event from "./event/Event";
  * Contains essential information about the request including timing and client details.
  */
 export interface RequestEvent {
-    request: NRequest;
+    request: NRequest | NResponse;
     timestamp: number;
-    event: Event;
+    event: string;
+    data?: any
 }

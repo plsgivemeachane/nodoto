@@ -2,11 +2,13 @@ import { Request } from "express";
 import EventManager from "../../monitoring/EventManager";
 import { RequestEvent } from "../../monitoring/RequestEvent";
 import Event from "../../monitoring/event/Event";
+import Utils from "../../../utils/utils";
 
 export default class NRequest {
     private readonly req: Request;
     private readonly eventManager: EventManager;
     private startTime: number;
+    public readonly ID = Utils.snowflakeId();
 
     constructor(req: Request) {
         this.req = req;
@@ -33,15 +35,16 @@ export default class NRequest {
 
         // Error event
         this.req.on('error', (error) => {
-            this.emitEvent('request:error', {
-                error: error.message
-            });
+            this.emitEvent('request:error');
         });
 
         // Close event
         this.req.on('close', () => {
-            this.emitEvent('request:close', {});
+            this.emitEvent('request:close');
         });
+
+        // Fire request start event
+        this.emitEvent('request:start');
     }
 
     /**
@@ -49,15 +52,12 @@ export default class NRequest {
      * @param eventName The name of the event
      * @param data Additional data for the event
      */
-    public emitEvent(eventName: string, data: any): void {
+    public emitEvent(eventName: string, data?: any): void {
         const event: RequestEvent = {
             request: this,
             timestamp: Date.now(),
-            event: {
-                name: eventName,
-                data: data,
-                timestamp: Date.now()
-            }
+            event: eventName,
+            data: data
         };
         this.eventManager.emit(eventName, event);
     }
@@ -67,13 +67,5 @@ export default class NRequest {
      */
     public getRequest(): Request {
         return this.req;
-    }
-
-    public on(eventName: string, listener: (event: RequestEvent) => void): void {
-        this.eventManager.on(eventName, listener);
-    }
-
-    public once(eventName: string, listener: (event: RequestEvent) => void): void {
-        this.eventManager.once(eventName, listener);
     }
 }

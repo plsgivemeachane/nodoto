@@ -1,21 +1,18 @@
-import NRequest from "../../../request/wrapper/NRequest";
+import { logger } from "../../../../utils/winston";
 import { RequestEvent } from "../../RequestEvent";
 import Event from "../Event";
+import { AbstractRequestHandler } from "../handler/AbstractRequestHandler";
 
 
-export default class InteruptEvent extends Event {
+export default class InteruptEvent extends Event<AbstractRequestHandler> {
     name: string = 'request:interupt';
     timestamp: number = Date.now();
 
     constructor(data?: any) {
-        super('request:interupt', data);
+        super(data);
     }
 
-    getReqestEvent(req: NRequest): RequestEvent {
-        return {
-            request: req,
-            event: this,
-            timestamp: this.timestamp
-        };
+    public onEvent(event: RequestEvent): void {
+        logger.debug("Request interrupted");
     }
 }
