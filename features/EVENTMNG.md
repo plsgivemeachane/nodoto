@@ -48,3 +48,7 @@ Firing the event will be passing the state of the request, response, and event d
 - The event manager is dispatch from the injectable Request.
     - So that the injectable request cannot be stoped.
     -> solution: the injectable request should be able to recive the event in event manager.
+
+
+### Sumarize today
+! FINISH THE EVENT MANAGER

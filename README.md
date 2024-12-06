@@ -88,8 +88,8 @@ This project is licensed under the MIT License.
 ## TODO List
 
 ### Side Features
-- [ ] Event based request monitoring
-- [ ] Custom response wrapper to control flow.
+- [x] Event based request monitoring
+- [x] Custom response wrapper to control flow.
 
 ### Core Framework Features
 - [ ] TypeSafe Express Integration
