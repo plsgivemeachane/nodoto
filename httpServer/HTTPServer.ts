@@ -77,10 +77,14 @@ export class HTTPServer {
 
         app.use(root.getPath(), root.getRouter())
 
+        app.use((_, res) => {
+            logger.warn(`[HTTPServer] Accessing non-existent route: ${res.req.url}`)
+            res.status(404).send("Not found");
+        });
+
         server.listen(this.port, () => {
             logger.info(`[Server] HTTP server started and listening on port ${this.port}`)
         });
-
     }
 
     public static getObservable(): Observable<string> {

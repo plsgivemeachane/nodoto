@@ -7,10 +7,14 @@ dotenv.config()
 import NResponse from '../request/wrapper/NResponse';
 import NRequest from '../request/wrapper/NRequest';
 import type { routeFunction } from '../request/InjectableRequest';
+import { checkPermission } from '../auth/rbac/middleware';
+import { User } from '../auth/rbac/types';
+import EventManager from '../monitoring/EventManager';
+import TimeoutEvent from '../monitoring/event/impl/TimeoutEvent';
 
 export default class Middlewares {
 
-    public static authUserUsingJWT: routeFunction = async (req: NRequest, res: NResponse) => {
+    private static authUserUsingJWT: routeFunction = async (req: NRequest, res: NResponse) => {
         logger.verbose(`[Auth] Validating JWT token for ${req.getRequest().method} ${req.getRequest().url}`)
         const token = req.getRequest().headers.authorization
         if (!token) {
@@ -35,10 +39,22 @@ export default class Middlewares {
         }
     }
 
-    //* Config in Route.ts after adding method to middleware
+    private static testAuth: routeFunction = async (req: NRequest, res: NResponse) => {
+        const demoUser: User = {
+            id: '1',
+            username: 'editor@example.com',
+            roles: ['viewer']
+        };
+        req.setUser(demoUser);
+        return true;
+    }
 
-    public static auth() {
-        return this.authUserUsingJWT;
+    public static auth = this.testAuth;
+
+    public static rbacCheckPerm = checkPermission;
+
+    public static timeout() {
+        return EventManager.getInstance().registerListenerForRequest(new TimeoutEvent().onEvent);
     }
 
     // public static timeout() {

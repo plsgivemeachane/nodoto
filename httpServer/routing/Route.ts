@@ -22,10 +22,6 @@ export default class Route {
         this.handler = new InjectableRequest();
         this.method = method;
 
-        //! Derpicated. Using route function
-        // if(middleware.auth) Middlewares.auth(this)
-        // if(middleware.timeout) Middlewares.timeout(this)
-
         return this;
     }
 

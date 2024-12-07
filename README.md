@@ -121,10 +121,10 @@ This project is licensed under the MIT License.
   - [ ] Implement refresh token mechanism
 
 - [ ] Authorization Framework
-  - [ ] Create role-based access control (RBAC)
-  - [ ] Implement permission-based authorization
-  - [ ] Add route-level authorization middleware
-  - [ ] Create resource-level access control
+  - [x] Create role-based access control (RBAC)
+  - [x] Implement permission-based authorization
+  - [x] Add route-level authorization middleware
+  - [x] Create resource-level access control
   - [ ] Add role hierarchy support
 
 ### Data Management

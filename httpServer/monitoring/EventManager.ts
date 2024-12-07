@@ -1,5 +1,6 @@
 import Observable from "../../utils/Observable";
 import { logger } from "../../utils/winston";
+import { routeFunction } from "../request/InjectableRequest";
 import NRequest from "../request/wrapper/NRequest";
 import NResponse from "../request/wrapper/NResponse";
 import RequestEventLogger from "./event/impl/RequestFinishEvent";
@@ -31,8 +32,8 @@ export default class EventManager {
         // this.registerEvent("response:kill");
 
         // Register listeners
-        this.registerAllListener(new RequestEventLogger().onEvent); // Register all event for this listeners
-        this.registerAllListener(new TimeoutEvent().onEvent);
+        // this.registerAllListener(new RequestEventLogger().onEvent); // Register all event for this listeners
+        // this.registerAllListener(new TimeoutEvent().onEvent);
 
 
         // Register cleanup listeners
@@ -51,6 +52,18 @@ export default class EventManager {
         for (const event of this.listeners.keys()) {
             this.registerListener(event, listener);
         }
+    }
+
+    public registerListenerForRequest(listener: (event: RequestEvent) => void) {
+        return ((req, res) => {
+            this.registerAllListener((event: RequestEvent) => {
+                if(event.request.ID === req.ID) {
+                    listener(event);
+                }
+            })
+
+            return true
+        }) as routeFunction
     }
 
     public getRequest(reqId: string): [NRequest, NResponse] | undefined {
@@ -76,7 +89,7 @@ export default class EventManager {
     }
 
     public registerRequest(req: NRequest, res: NResponse): void {   
-        logger.verbose(`[EventManager] Registering request ${req.ID} and response ${res.ID}`);
+        // logger.verbose(`[EventManager] Registering request ${req.ID} and response ${res.ID}`);
         this.requestMap.set(req.ID, [req, res]);
     }
 

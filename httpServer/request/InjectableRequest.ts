@@ -43,7 +43,7 @@ export default class InjectableRequest {
      * @returns An asynchronous function that takes an Express request and response object, logging the request details and executing all routes.
      */
     public getHandler() {
-        return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        return async (req: express.Request, res: express.Response) => {
             logger.verbose(`[HTTP] Incoming ${req.method} request to ${req.url} from ${req.ip}`)
             try {
                 logger.debug(`[HTTP] Processing over ${this.routes.length} routes`)
@@ -63,7 +63,7 @@ export default class InjectableRequest {
                     if(nres.isClosedYet()) {
                         //* DO NOT CONTINUE PROCESSING
                         logger.verbose(`[HTTP] Request processing halted by middleware or handler`)
-                        return;
+                        break;
                     }
 
                     let result = await route(nreq, nres);
@@ -71,8 +71,8 @@ export default class InjectableRequest {
                         throw new Error("[HTTP] Route must return a boolean value")
                     }
                     if(!result) {
-                        logger.verbose(`[HTTP] Request processing halted by middleware or handler`)
-                        return;
+                        // logger.verbose(`[HTTP] Request processing halted by middleware or handler`)
+                        break;
                     }
                 }
 

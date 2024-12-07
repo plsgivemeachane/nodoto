@@ -78,26 +78,26 @@ export default class NResponse {
 
     json(data: any, status: number = 200) : boolean {
         if(this.responseData.sent || this.isClosed) {
-            return true;
+            return false;
         }
 
         this.responseData.sent = true
         this.responseData.data = data
         this.responseData.method = "json"
         this.responseData.status = status
-        return true
+        return false
     }
 
     send(data: any, status: number = 200) : boolean {
         if(this.responseData.sent || this.isClosed) {
-            return true;
+            return false;
         }
 
         this.responseData.sent = true
         this.responseData.data = data
         this.responseData.method = "send"
         this.responseData.status = status
-        return true
+        return false
     }
 
     dispatch() {

@@ -2,6 +2,7 @@ import { Request } from "express";
 import EventManager from "../../monitoring/EventManager";
 import { RequestEvent } from "../../monitoring/RequestEvent";
 import Utils from "../../../utils/utils";
+import { User } from "../../auth/rbac/types";
 
 /**
  * Class representing a wrapped HTTP request.
@@ -13,6 +14,8 @@ export default class NRequest {
     private readonly eventManager: EventManager;
     private startTime: number;
     public readonly ID = Utils.snowflakeId();
+
+    private user: User | undefined;
 
     constructor(req: Request) {
         this.req = req;
@@ -71,5 +74,13 @@ export default class NRequest {
      */
     public getRequest(): Request {
         return this.req;
+    }
+
+    public setUser(user: User): void {
+        this.user = user;
+    }
+
+    public getUser(): User | undefined {
+        return this.user;
     }
 }
