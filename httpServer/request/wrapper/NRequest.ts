@@ -1,9 +1,13 @@
 import { Request } from "express";
 import EventManager from "../../monitoring/EventManager";
 import { RequestEvent } from "../../monitoring/RequestEvent";
-import Event from "../../monitoring/event/Event";
 import Utils from "../../../utils/utils";
 
+/**
+ * Class representing a wrapped HTTP request.
+ * Provides additional functionality such as emitting events based on the request's lifecycle.
+ * @see RequestEvent
+ */
 export default class NRequest {
     private readonly req: Request;
     private readonly eventManager: EventManager;

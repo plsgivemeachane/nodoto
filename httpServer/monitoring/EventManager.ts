@@ -2,7 +2,7 @@ import Observable from "../../utils/Observable";
 import { logger } from "../../utils/winston";
 import NRequest from "../request/wrapper/NRequest";
 import NResponse from "../request/wrapper/NResponse";
-import RequestFinishEvent from "./event/impl/RequestFinishEvent";
+import RequestEventLogger from "./event/impl/RequestFinishEvent";
 import TimeoutEvent from "./event/impl/TimeoutEvent";
 import { RequestEvent } from "./RequestEvent";
 
@@ -31,7 +31,7 @@ export default class EventManager {
         // this.registerEvent("response:kill");
 
         // Register listeners
-        this.registerAllListener(new RequestFinishEvent().onEvent); // Register all event for this listeners
+        this.registerAllListener(new RequestEventLogger().onEvent); // Register all event for this listeners
         this.registerAllListener(new TimeoutEvent().onEvent);
 
 
@@ -53,16 +53,25 @@ export default class EventManager {
         }
     }
 
+    public getRequest(reqId: string): [NRequest, NResponse] | undefined {
+        return this.requestMap.get(reqId);
+    }
+
     public kill(reqId: string, reason: string = "Internal Server Error", status: number = 500): void {
         const requestPair = this.requestMap.get(reqId);
         if (requestPair) {
             const [_, response] = requestPair;
+            if(response.isClosedYet()) {
+                logger.error(`Request ${reqId} closed`);
+                return
+            }
+
             logger.warn(`Request ${reqId} killed with reason: ${reason} and status: ${status}`);
             response.send({ error: reason, status: status }, status);
             response.dispatch();
             this.requestMap.delete(reqId);
         } else {
-            logger.error(`Request ${reqId} not found or already closed`);
+            logger.error(`Request ${reqId} not found`);
         }
     }
 

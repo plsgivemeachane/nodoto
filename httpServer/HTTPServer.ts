@@ -57,9 +57,18 @@ export class HTTPServer {
         const app = express();
         const server = http.createServer(app);
         // Middleware
-        if(HTTPServer.config.useJsonParser) app.use(express.json());
-        if(HTTPServer.config.useUrlParser) app.use(express.urlencoded({ extended: true }));
-        if(HTTPServer.config.corsSetting) app.use(cors(HTTPServer.config.corsSetting));
+        if(HTTPServer.config.useJsonParser) {
+            logger.info(`[HTTPServer] Enabling JSON parser.`)
+            app.use(express.json());
+        }
+        if(HTTPServer.config.useUrlParser) {
+            logger.info(`[HTTPServer] Enabling URL-encoded data parser.`)
+            app.use(express.urlencoded({ extended: true }));
+        }
+        if(HTTPServer.config.corsSetting) {
+            logger.info(`[HTTPServer] Enabling CORS.`)
+            app.use(cors(HTTPServer.config.corsSetting));
+        }
 
         const root = new RouteGroup("/")
         for(let route of this.routes) {

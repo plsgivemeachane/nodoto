@@ -18,6 +18,12 @@ export class TimeoutRequestHandler extends AbstractRequestHandler {
 
         // Start a timeout timer
         this.timerId = setTimeout(() => {
+            const req = this.eventManager.getRequest(this.requestId);
+            if(req![1].isClosedYet()) {
+                logger.debug(`Request ${this.requestId} already closed`);
+                return;
+            }
+
             logger.debug(`Request ${this.requestId} timed out after ${this.timeout}ms`);
             // kill the request
             this.eventManager.kill(this.requestId, "Request Timeout", 408);
@@ -25,24 +31,15 @@ export class TimeoutRequestHandler extends AbstractRequestHandler {
     }
 
     handleEnd(event: RequestEvent): void {
-        // const duration = this.getDuration(event.timestamp);
-        // logger.debug(`Request ${this.requestId} time ended. Duration: ${duration}ms`);
         this.cleanup();
     }
 
     handleError(event: RequestEvent): void {
-        // const duration = this.getDuration(event.timestamp);
-        // logger.debug(`Request ${this.requestId} ended with error. Duration: ${duration}ms`);
         this.cleanup();
     }
-
-    private getDuration(endTimestamp: number): number {
-        return endTimestamp - this.startTime;
-    }
-
+    
     private cleanup(): void {
-        if (this.timerId) {
-            clearTimeout(this.timerId);
-        }
+        logger.debug(`Request ${this.requestId} cleanup`);
+        clearTimeout(this.timerId);
     }
 }

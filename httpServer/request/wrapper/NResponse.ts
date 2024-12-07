@@ -1,5 +1,4 @@
 import { Response } from "express";
-import Observable from "../../../utils/Observable";
 import { RequestEvent } from "../../monitoring/RequestEvent";
 import EventManager from "../../monitoring/EventManager";
 import Utils from "../../../utils/utils";
@@ -11,6 +10,11 @@ interface ResponseSent {
     status: number
 }
 
+/**
+ * Wrapper for Express Response object to monitor and log its events (start, data, end, error, close)
+ * Also provides methods to send data and close the response
+ * @class NResponse
+ */
 export default class NResponse {
     private readonly res: Response
     private responseData: ResponseSent = {sent: false, status: 200}
@@ -72,26 +76,28 @@ export default class NResponse {
         this.eventManager.emit(eventName, event);
     }
 
-    json(data: any, status: number = 200) {
+    json(data: any, status: number = 200) : boolean {
         if(this.responseData.sent || this.isClosed) {
-            return;
+            return true;
         }
 
         this.responseData.sent = true
         this.responseData.data = data
         this.responseData.method = "json"
         this.responseData.status = status
+        return true
     }
 
-    send(data: any, status: number = 200) {
+    send(data: any, status: number = 200) : boolean {
         if(this.responseData.sent || this.isClosed) {
-            return;
+            return true;
         }
 
         this.responseData.sent = true
         this.responseData.data = data
         this.responseData.method = "send"
         this.responseData.status = status
+        return true
     }
 
     dispatch() {

@@ -7,7 +7,7 @@ import EventManager from './EventManager';
 import TimeoutEvent from './event/impl/TimeoutEvent';
 import NRequest from '../request/wrapper/NRequest';
 import NResponse from '../request/wrapper/NResponse';
-import RequestFinishEvent from './event/impl/RequestFinishEvent';
+import RequestEventLogger from './event/impl/RequestFinishEvent';
 
 export default abstract class RequestMonitor {
     /**
