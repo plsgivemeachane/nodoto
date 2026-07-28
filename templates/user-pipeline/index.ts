@@ -1,4 +1,4 @@
-import { HTTPServer, Route, RouteGroup, RequestType } from '../../httpServer';
+import { HTTPServer, Route, RouteGroup, RequestType, AuthManager } from '../../httpServer';
 import Middlewares from '../../httpServer/routing/Middleware';
 import { checkPermission } from '../../httpServer/auth/rbac/middleware';
 import { User } from '../../httpServer/auth/rbac/types';
@@ -8,10 +8,11 @@ import Joi from 'joi';
 import { logger } from '../../utils/winston';
 
 // === FULL USER PIPELINE TEMPLATE ===
-// Register -> Login (JWT) -> RBAC -> Validation -> Error Handling
-// Everything wired together in a ready-to-run server.
+// Register -> Login (JWT + bcrypt) -> RBAC -> Validation -> Error Handling
+// Password hashing is AUTOMATIC via AuthManager.
 
-const users: Map<string, { id: string; username: string; password: string; roles: string[] }> = new Map();
+interface StoredUser { id: string; username: string; passwordHash: string; roles: string[] }
+const users: Map<string, StoredUser> = new Map();
 
 HTTPServer.init({
     port: 3000,
@@ -23,6 +24,8 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 
 // --- Auth ---
+
+// POST /auth/register — password is automatically hashed by AuthManager.register()
 const register = new Route('/auth/register', RequestType.POST)
     .route(Validator.validate({
         body: Joi.object({
@@ -31,14 +34,27 @@ const register = new Route('/auth/register', RequestType.POST)
             role: Joi.string().valid('admin', 'editor', 'viewer').default('viewer')
         })
     }))
+    .route(AuthManager.register()) // Automatically hashes password, generates JWT
     .route(async (req, res) => {
         const body = req.getRequest().body;
         if (users.has(body.username)) throw new ConflictError('Username already taken');
-        const userId = Date.now().toString();
-        users.set(body.username, { id: userId, username: body.username, password: body.password, roles: [body.role] });
-        return res.send({ message: 'Registered', user: { id: userId, username: body.username, roles: [body.role] } });
+
+        // Store user with hashed password (hashing already done by AuthManager)
+        users.set(body.username, {
+            id: body._user.id,
+            username: body.username,
+            passwordHash: body.password, // Already hashed!
+            roles: body.roles
+        });
+
+        return res.send({
+            message: 'Registered successfully',
+            token: body._token,
+            user: body._user
+        });
     });
 
+// POST /auth/login — password is automatically verified by AuthManager.login()
 const login = new Route('/auth/login', RequestType.POST)
     .route(Validator.validate({
         body: Joi.object({
@@ -48,33 +64,37 @@ const login = new Route('/auth/login', RequestType.POST)
     }))
     .route(async (req, res) => {
         const body = req.getRequest().body;
-        const user = users.get(body.username);
-        if (!user || user.password !== body.password) throw new UnauthorizedError('Invalid credentials');
-        req.setUser({ id: user.id, username: user.username, roles: user.roles });
-        return res.send({ message: 'Login successful', user: { id: user.id, username: user.username, roles: user.roles } });
-    });
+        const stored = users.get(body.username);
+        if (!stored) throw new UnauthorizedError('Invalid credentials');
 
+        // Attach stored data for AuthManager.login() to use
+        body._storedHash = stored.passwordHash;
+        body._userId = stored.id;
+        body._roles = stored.roles;
+        return true; // Continue to AuthManager.login()
+    })
+    .route(AuthManager.login()); // Automatically verifies password, generates JWT
+
+// GET /auth/me — requires JWT auth
 const me = new Route('/auth/me', RequestType.GET)
-    .route(Middlewares.auth)
+    .route(AuthManager.jwtAuth()) // Automatically verifies JWT and sets user
     .route(async (req, res) => {
-        const user = req.getUser();
-        if (!user) throw new UnauthorizedError('Not authenticated');
-        return res.send({ user });
+        return res.send({ user: req.getUser() });
     });
 
-// --- Posts (RBAC protected) ---
+// --- Posts (RBAC protected with JWT auth) ---
 const posts: Map<number, { id: number; title: string; author: string }> = new Map();
 let nextId = 1;
 
 const listPosts = new Route('/posts', RequestType.GET)
-    .route(Middlewares.auth)
+    .route(AuthManager.jwtAuth())
     .route(checkPermission('read', 'posts'))
     .route(async (req, res) => {
         return res.send({ posts: Array.from(posts.values()), count: posts.size });
     });
 
 const createPost = new Route('/posts', RequestType.POST)
-    .route(Middlewares.auth)
+    .route(AuthManager.jwtAuth())
     .route(checkPermission('create', 'posts'))
     .route(Validator.validate({
         body: Joi.object({ title: Joi.string().min(1).max(200).required() })
@@ -88,7 +108,7 @@ const createPost = new Route('/posts', RequestType.POST)
     });
 
 const deletePost = new Route('/posts/:id', RequestType.DELETE)
-    .route(Middlewares.auth)
+    .route(AuthManager.jwtAuth())
     .route(checkPermission('delete', 'posts'))
     .route(async (req, res) => {
         const id = parseInt(req.getRequest().params.id);

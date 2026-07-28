@@ -12,6 +12,7 @@ import SessionManager from "./session/SessionManager";
 import SwaggerManager from "./docs/SwaggerManager";
 import RateLimiter from "./middleware/RateLimiter";
 import ThreadPool from "./threading/ThreadPool";
+import AuthManager from "./auth/AuthManager";
 
 export {
     HTTPServer,
@@ -33,5 +34,6 @@ export {
     SessionManager,
     SwaggerManager,
     RateLimiter,
-    ThreadPool
+    ThreadPool,
+    AuthManager
 };
