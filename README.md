@@ -1,6 +1,7 @@
 # Nodoto
 
-A Express wrapper that makes your life easier with a bunch of built-in features. Nodoto provides a simplified way to build robust Express applications with pre-configured essential features.
+An unnecessary big dependency chain template for NodeJS with the most bloated libraries that you mostly don't use — but you can make it one line without even needing to touch the `package.json`. Super extensible, super customizable, but super bloat :))
+
 __shh you don't even need it...__
 
 ## Features
@@ -128,43 +129,43 @@ This project is licensed under the MIT License.
   - [ ] Add role hierarchy support
 
 ### Data Management
-- [ ] Database Integration
-  - [ ] Create database connection manager
+- [-] Database Integration
+  - [x] Create database connection manager
   - [ ] Implement MongoDB support
   - [ ] Add PostgreSQL integration
-  - [ ] Create Redis cache layer
+  - [x] Create Redis cache layer
   - [ ] Implement connection pooling
   - [ ] Add database migration system
 
-- [ ] File Upload System
-  - [ ] Set up Multer integration
-  - [ ] Implement file size and type validation
+- [-] File Upload System
+  - [x] Set up Multer integration
+  - [x] Implement file size and type validation
   - [ ] Add cloud storage support (S3, GCS)
   - [ ] Create file cleanup mechanism
   - [ ] Implement progress tracking
 
 ### Session & State Management
-- [ ] Session Handler
-  - [ ] Implement express-session integration
+- [-] Session Handler
+  - [x] Implement express-session integration
   - [ ] Add Redis session store
   - [ ] Create session cleanup mechanism
-  - [ ] Implement session security measures
+  - [x] Implement session security measures
   - [ ] Add session analytics
 
 ### Validation & Error Handling
-- [ ] Request Validation
-  - [ ] Set up Joi validation framework
+- [-] Request Validation
+  - [x] Set up Joi validation framework
   - [ ] Create custom validation rules
-  - [ ] Implement validation middleware
-  - [ ] Add validation error formatting
+  - [x] Implement validation middleware
+  - [x] Add validation error formatting
   - [ ] Create validation documentation generator
 
-- [ ] Error Management
-  - [ ] Implement global error handler
-  - [ ] Create custom error classes
-  - [ ] Add error logging mechanism
-  - [ ] Implement error response formatting
-  - [ ] Add development/production error modes
+- [-] Error Management
+  - [x] Implement global error handler
+  - [x] Create custom error classes
+  - [x] Add error logging mechanism
+  - [x] Implement error response formatting
+  - [x] Add development/production error modes
 
 ### Performance & Scaling
 - [ ] Threading Support
@@ -173,6 +174,29 @@ This project is licensed under the MIT License.
   - [ ] Add task queue system
   - [ ] Implement thread communication
   - [ ] Add thread monitoring
+
+### Templates
+- [ ] One-Line Templates (~20 templates, each making setup a one-liner without touching `package.json`)
+  - [ ] Hello World template
+  - [ ] REST API template
+  - [ ] Auth (JWT) template
+  - [ ] Auth (OAuth2) template
+  - [ ] RBAC template
+  - [ ] Session-based auth template
+  - [ ] File upload template
+  - [ ] WebSocket template
+  - [ ] Redis cache template
+  - [ ] MongoDB template
+  - [ ] PostgreSQL template
+  - [ ] Swagger docs template
+  - [ ] Health check template
+  - [ ] Request validation template
+  - [ ] Error handling template
+  - [ ] Worker threads template
+  - [ ] Logging template
+  - [ ] CORS template
+  - [ ] Rate limiting template
+  - [ ] Full-stack starter template
 
 ### Documentation & Monitoring
 - [ ] Swagger Documentation
@@ -198,9 +222,9 @@ This project is licensed under the MIT License.
   - [-] Implement log analysis tools
 
 ### Testing & Quality Assurance
-- [ ] Testing Framework
-  - [ ] Set up Jest configuration
-  - [ ] Create unit test templates
+- [-] Testing Framework
+  - [x] Set up Jest configuration
+  - [x] Create unit test templates
   - [ ] Implement integration tests
   - [ ] Add performance testing
   - [ ] Create test documentation

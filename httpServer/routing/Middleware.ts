@@ -53,6 +53,7 @@ export default class Middlewares {
 
     public static rbacCheckPerm = checkPermission;
 
+
     public static timeout() {
         return EventManager.getInstance().registerListenerForRequest(new TimeoutEvent().onEvent);
     }
