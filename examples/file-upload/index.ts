@@ -1,6 +1,4 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
-import { FileUpload } from '../../httpServer/upload/FileUpload';
-import { logger } from '../../utils/winston';
+import { FileUpload, HTTPServer, RequestType, Route, logger } from '../../';
 import fs from 'fs';
 import path from 'path';
 

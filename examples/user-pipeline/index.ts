@@ -1,12 +1,6 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
-import Middlewares from '../../httpServer/routing/Middleware';
-import { checkPermission } from '../../httpServer/auth/rbac/middleware';
-import { User } from '../../httpServer/auth/rbac/types';
-import { RBACManager } from '../../httpServer/auth/rbac/RBACManager';
-import { Validator } from '../../httpServer/validation/Validator';
-import { UnauthorizedError, ConflictError, NotFoundError } from '../../httpServer/errors/AppError';
+import { ConflictError, HTTPServer, Middlewares, NotFoundError, RBACManager, RequestType, Route, UnauthorizedError, Validator, checkPermission, logger } from '../../';
+import type { User } from '../../';
 import Joi from 'joi';
-import { logger } from '../../utils/winston';
 
 // In-memory user store (in production, use a database)
 const users: Map<string, { id: string; username: string; password: string; roles: string[] }> = new Map();

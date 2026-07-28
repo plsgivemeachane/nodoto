@@ -1,12 +1,8 @@
-import { HTTPServer, Route, RouteGroup, RequestType } from '../../httpServer';
-import Middlewares from '../../httpServer/routing/Middleware';
-import { checkPermission } from '../../httpServer/auth/rbac/middleware';
-import { Validator } from '../../httpServer/validation/Validator';
+import { HTTPServer, Middlewares, RequestType, Route, RouteGroup, Validator, checkPermission, logger } from '../../';
 import {
     NotFoundError
 } from '../../httpServer/errors/AppError';
 import Joi from 'joi';
-import { logger } from '../../utils/winston';
 
 // In-memory data store
 const posts: Map<number, { id: number; title: string; content: string; author: string }> = new Map();

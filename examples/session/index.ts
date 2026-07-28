@@ -1,7 +1,5 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
-import { SessionManager } from '../../httpServer/session/SessionManager';
+import { HTTPServer, RequestType, Route, SessionManager, logger } from '../../';
 import express from 'express';
-import { logger } from '../../utils/winston';
 
 // Initialize server
 HTTPServer.init({

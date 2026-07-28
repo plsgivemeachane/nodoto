@@ -1,6 +1,4 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
-import Middlewares from '../../httpServer/routing/Middleware';
-import { logger } from '../../utils/winston';
+import { HTTPServer, Middlewares, RequestType, Route, logger } from '../../';
 
 // Initialize server with short timeout to demonstrate
 HTTPServer.init({

@@ -1,4 +1,4 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
+import { HTTPServer, RequestType, Route } from '../../';
 
 // === ECHO SERVER TEMPLATE ===
 // Minimal server that echoes requests back.

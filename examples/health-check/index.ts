@@ -1,6 +1,5 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
+import { HTTPServer, RequestType, Route, logger } from '../../';
 import os from 'os';
-import { logger } from '../../utils/winston';
 
 // Initialize server
 HTTPServer.init({

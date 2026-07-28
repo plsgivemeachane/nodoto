@@ -1,7 +1,5 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
-import { Validator } from '../../httpServer/validation/Validator';
+import { HTTPServer, Route, RequestType, Validator, logger } from '../../';
 import Joi from 'joi';
-import { logger } from '../../utils/winston';
 
 // Initialize server
 HTTPServer.init({

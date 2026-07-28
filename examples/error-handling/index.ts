@@ -1,4 +1,4 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
+import { HTTPServer, RequestType, Route } from '../../';
 import {
     AppError,
     ValidationError,

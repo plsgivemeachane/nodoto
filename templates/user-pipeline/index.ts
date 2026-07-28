@@ -1,11 +1,6 @@
-import { HTTPServer, Route, RouteGroup, RequestType, AuthManager } from '../../httpServer';
-import Middlewares from '../../httpServer/routing/Middleware';
-import { checkPermission } from '../../httpServer/auth/rbac/middleware';
-import { User } from '../../httpServer/auth/rbac/types';
-import { Validator } from '../../httpServer/validation/Validator';
-import { UnauthorizedError, ConflictError, NotFoundError } from '../../httpServer/errors/AppError';
+import { AuthManager, ConflictError, HTTPServer, Middlewares, NotFoundError, RequestType, Route, RouteGroup, UnauthorizedError, Validator, checkPermission, logger } from '../../';
+import type { User } from '../../';
 import Joi from 'joi';
-import { logger } from '../../utils/winston';
 
 // === FULL USER PIPELINE TEMPLATE ===
 // Register -> Login (JWT + bcrypt) -> RBAC -> Validation -> Error Handling

@@ -1,8 +1,5 @@
-import { HTTPServer, Route, RouteGroup, RequestType } from '../../httpServer';
-import Middlewares from '../../httpServer/routing/Middleware';
-import { checkPermission } from '../../httpServer/auth/rbac/middleware';
-import { User } from '../../httpServer/auth/rbac/types';
-import { Validator } from '../../httpServer/validation/Validator';
+import { HTTPServer, Middlewares, RequestType, Route, RouteGroup, Validator, checkPermission, logger } from '../../';
+import type { User } from '../../';
 import {
     NotFoundError,
     UnauthorizedError,
@@ -10,7 +7,6 @@ import {
     AppError
 } from '../../httpServer/errors/AppError';
 import Joi from 'joi';
-import { logger } from '../../utils/winston';
 import os from 'os';
 
 // In-memory data

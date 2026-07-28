@@ -1,6 +1,4 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
-import { logger } from '../../utils/winston';
-import Utils from '../../utils/utils';
+import { HTTPServer, RequestType, Route, Utils, logger } from '../../';
 
 // Initialize server with verbose logging
 HTTPServer.init({

@@ -1,6 +1,4 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
-import RedisHelper from '../../httpServer/databases/RedisHelper';
-import { logger } from '../../utils/winston';
+import { HTTPServer, RedisHelper, RequestType, Route, logger } from '../../';
 
 // Initialize server
 HTTPServer.init({

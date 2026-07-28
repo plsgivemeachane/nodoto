@@ -1,8 +1,5 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
-import Middlewares from '../../httpServer/routing/Middleware';
-import EventManager from '../../httpServer/monitoring/EventManager';
-import { RequestEvent } from '../../httpServer/monitoring/RequestEvent';
-import { logger } from '../../utils/winston';
+import { EventManager, HTTPServer, Middlewares, RequestType, Route, logger } from '../../';
+import type { RequestEvent } from '../../';
 
 // Initialize server
 HTTPServer.init({

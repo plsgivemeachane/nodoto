@@ -1,8 +1,4 @@
-import { HTTPServer } from '../../httpServer/HTTPServer';
-import { RequestType } from '../../httpServer/request/RequestType';
-import Route from '../../httpServer/routing/Route';
-import Utils from '../../utils/utils';
-import { logger } from '../../utils/winston';
+import { HTTPServer, RequestType, Route, Utils, logger } from '../../';
 // Initialize HTTP server
 HTTPServer.init({
     port: 3000,

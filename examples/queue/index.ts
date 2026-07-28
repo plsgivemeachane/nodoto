@@ -1,6 +1,4 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
-import Queue from '../../httpServer/queue/Queue';
-import { logger } from '../../utils/winston';
+import { HTTPServer, Queue, RequestType, Route, logger } from '../../';
 import path from 'path';
 
 // Initialize server

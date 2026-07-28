@@ -1,4 +1,4 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
+import { HTTPServer, RequestType, Route } from '../../';
 import os from 'os';
 
 // === MICROSERVICE STARTER TEMPLATE ===

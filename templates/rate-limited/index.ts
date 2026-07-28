@@ -1,9 +1,5 @@
-import { HTTPServer, Route, RequestType } from '../../httpServer';
-import { RateLimiter } from '../../httpServer/middleware/RateLimiter';
-import { Validator } from '../../httpServer/validation/Validator';
-import { RateLimitError } from '../../httpServer/errors/AppError';
+import { HTTPServer, RateLimitError, RateLimiter, RequestType, Route, Validator, logger } from '../../';
 import Joi from 'joi';
-import { logger } from '../../utils/winston';
 
 // === RATE LIMITED SERVER TEMPLATE ===
 // Different rate limits for different endpoints.

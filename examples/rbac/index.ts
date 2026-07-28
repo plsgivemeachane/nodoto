@@ -1,10 +1,5 @@
-import { Route } from "../../httpServer";
-import { HTTPServer } from "../../httpServer/HTTPServer";
-import { checkPermission } from "../../httpServer/auth/rbac/middleware";
-import { User } from "../../httpServer/auth/rbac/types";
-import { RequestType } from "../../httpServer/request/RequestType";
-import Middlewares from "../../httpServer/routing/Middleware";
-import { logger } from "../../utils/winston";
+import { HTTPServer, Middlewares, RequestType, Route, checkPermission, logger } from '../../';
+import type { User } from '../../';
 
 // Initialize server
 HTTPServer.init({
@@ -13,7 +8,6 @@ HTTPServer.init({
     logLevel: 'debug'
 });
 const server = HTTPServer.getInstance();
-
 
 // Create routes with RBAC
 /**

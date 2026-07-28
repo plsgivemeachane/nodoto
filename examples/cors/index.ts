@@ -1,4 +1,4 @@
-import { HTTPServer, Route, RouteGroup, RequestType } from '../../httpServer';
+import { HTTPServer, RequestType, Route, RouteGroup } from '../../';
 
 // Initialize server with CORS enabled
 HTTPServer.init({

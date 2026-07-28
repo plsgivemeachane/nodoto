@@ -1,7 +1,4 @@
-import { HTTPServer, Route, RouteGroup, RequestType } from '../../httpServer';
-import { Validator } from '../../httpServer/validation/Validator';
-import { NotFoundError } from '../../httpServer/errors/AppError';
-import { RateLimiter } from '../../httpServer/middleware/RateLimiter';
+import { HTTPServer, NotFoundError, RateLimiter, RequestType, Route, RouteGroup, Validator } from '../../';
 import Joi from 'joi';
 
 // === REST API SERVER TEMPLATE ===
