@@ -1,26 +1,63 @@
 import { logger } from "../../../../utils/winston";
-import NRequest from "../../../request/wrapper/NRequest";
 import { RequestEvent } from "../../RequestEvent";
 import Event from "../Event";
-import { AbstractRequestHandler } from "../handler/AbstractRequestHandler";
+import { RequestFinishEventHandler } from "../handler/impl/RequestFinishEventHandler";
 
-export default class RequestEventLogger extends Event<AbstractRequestHandler> {
-    getRequestId(event: RequestEvent): string {
-        throw new Error("Method not implemented.");
-    }
-    getOrCreateHandler(requestId: string): AbstractRequestHandler {
-        throw new Error("Method not implemented.");
-    }
-    cleanupHandler(requestId: string): void {
-        throw new Error("Method not implemented.");
-    }
-    name: string = 'request_logger';
+/**
+ * Event fired when a request has been fully processed.
+ * Logs request completion metrics: method, URL, duration, and outcome.
+ */
+export default class RequestFinishEvent extends Event<RequestFinishEventHandler> {
+    name: string = 'request_finish';
 
     constructor(data?: any) {
         super(data);
     }
 
+    getRequestId(event: RequestEvent): string {
+        if (!event.request) {
+            throw new Error("Request object is undefined in event");
+        }
+        return event.request.ID;
+    }
+
+    getOrCreateHandler(requestId: string): RequestFinishEventHandler {
+        let handler = this.requestHandlers.get(requestId);
+        if (!handler) {
+            handler = new RequestFinishEventHandler(requestId);
+            this.requestHandlers.set(requestId, handler);
+        }
+        return handler;
+    }
+
+    cleanupHandler(requestId: string): void {
+        this.requestHandlers.delete(requestId);
+    }
+
     public onEvent(event: RequestEvent): void {
-        logger.debug(`Request ${event.request.ID} - ${event.event}`);
+        const requestId = this.getRequestId(event);
+        const handler = this.getOrCreateHandler(requestId);
+
+        switch(event.event) {
+            case "request:start":
+                handler.handleStart(event);
+                break;
+            case "response:end":
+            case "response:close":
+                if (event.data) {
+                    handler.setEventData(event.data);
+                }
+                handler.handleEnd(event);
+                this.cleanupHandler(requestId);
+                break;
+            case "response:error":
+            case "request:error":
+                if (event.data) {
+                    handler.setEventData(event.data);
+                }
+                handler.handleError(event);
+                this.cleanupHandler(requestId);
+                break;
+        }
     }
 }

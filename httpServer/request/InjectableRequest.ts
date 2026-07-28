@@ -60,7 +60,7 @@ export default class InjectableRequest {
                 this.eventManager.registerRequest(nreq, nres);
 
                 for(let route of this.routes) {
-                    if(nres.isClosedYet()) {
+                    if(nres.isClosedYet() || nreq.isKilled()) {
                         //* DO NOT CONTINUE PROCESSING
                         logger.verbose(`[HTTP] Request processing halted by middleware or handler`)
                         break;
