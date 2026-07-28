@@ -1,5 +1,5 @@
-import { EventManager, HTTPServer, Middlewares, RequestType, Route, logger } from '../../';
-import type { RequestEvent } from '../../';
+import { HTTPServer } from '../../';
+import type { RequestEvent } from '../../httpServer/monitoring/RequestEvent';
 
 // Initialize server
 HTTPServer.init({
@@ -11,37 +11,37 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 
 // Register a custom event listener that logs all request lifecycle events
-const eventManager = EventManager.getInstance();
+const eventManager = HTTPServer.Events.getInstance();
 
 // Listen to request start events
 eventManager.registerListener('request:start', (event: RequestEvent) => {
-    logger.verbose(`[Event] Request started: ${event.request.ID} at ${event.timestamp}`);
+    HTTPServer.Logger.verbose(`[Event] Request started: ${event.request.ID} at ${event.timestamp}`);
 });
 
 // Listen to request end events
 eventManager.registerListener('request:end', (event: RequestEvent) => {
-    logger.verbose(`[Event] Request ended: ${event.request.ID}, duration: ${event.data?.totalTime}ms`);
+    HTTPServer.Logger.verbose(`[Event] Request ended: ${event.request.ID}, duration: ${event.data?.totalTime}ms`);
 });
 
 // Listen to response close events
 eventManager.registerListener('response:close', (event: RequestEvent) => {
-    logger.verbose(`[Event] Response closed: ${event.request.ID}`);
+    HTTPServer.Logger.verbose(`[Event] Response closed: ${event.request.ID}`);
 });
 
 // Listen to error events
 eventManager.registerListener('request:error', (event: RequestEvent) => {
-    logger.error(`[Event] Request error: ${event.request.ID}`);
+    HTTPServer.Logger.error(`[Event] Request error: ${event.request.ID}`);
 });
 
 eventManager.registerListener('response:error', (event: RequestEvent) => {
-    logger.error(`[Event] Response error: ${event.request.ID}`);
+    HTTPServer.Logger.error(`[Event] Response error: ${event.request.ID}`);
 });
 
 // GET / — simple route with timeout middleware
-const rootRoute = new Route('/', RequestType.GET)
-    .route(Middlewares.timeout())
+const rootRoute = new HTTPServer.Route('/', HTTPServer.RequestType.GET)
+    .route(HTTPServer.Middlewares.timeout())
     .route(async (req, res) => {
-        logger.info(`[Example] Processing request ${req.ID}`);
+        HTTPServer.Logger.info(`[Example] Processing request ${req.ID}`);
         return res.send({
             message: 'Check the server logs to see event lifecycle',
             requestId: req.ID
@@ -49,10 +49,10 @@ const rootRoute = new Route('/', RequestType.GET)
     });
 
 // GET /slow — slow route to see timing events
-const slowRoute = new Route('/slow', RequestType.GET)
-    .route(Middlewares.timeout())
+const slowRoute = new HTTPServer.Route('/slow', HTTPServer.RequestType.GET)
+    .route(HTTPServer.Middlewares.timeout())
     .route(async (req, res) => {
-        logger.info(`[Example] Slow request started: ${req.ID}`);
+        HTTPServer.Logger.info(`[Example] Slow request started: ${req.ID}`);
         await new Promise(resolve => setTimeout(resolve, 2000));
         return res.send({
             message: 'Slow request completed',
@@ -63,5 +63,5 @@ const slowRoute = new Route('/slow', RequestType.GET)
 server.addRoute(rootRoute);
 server.addRoute(slowRoute);
 
-logger.info('[Example] Event monitoring example running. Watch logs for request lifecycle events.');
+HTTPServer.Logger.info('[Example] Event monitoring example running. Watch logs for request lifecycle events.');
 server.start();

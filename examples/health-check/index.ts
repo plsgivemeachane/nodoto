@@ -1,4 +1,4 @@
-import { HTTPServer, RequestType, Route, logger } from '../../';
+import { HTTPServer } from '../../';
 import os from 'os';
 
 // Initialize server
@@ -13,7 +13,7 @@ const server = HTTPServer.getInstance();
 const startTime = Date.now();
 
 // GET /health — basic health check
-const healthRoute = new Route('/health', RequestType.GET)
+const healthRoute = new HTTPServer.Route('/health', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({
             status: 'healthy',
@@ -23,7 +23,7 @@ const healthRoute = new Route('/health', RequestType.GET)
     });
 
 // GET /health/detailed — detailed system metrics
-const detailedHealthRoute = new Route('/health/detailed', RequestType.GET)
+const detailedHealthRoute = new HTTPServer.Route('/health/detailed', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         const memUsage = process.memoryUsage();
         const cpus = os.cpus();
@@ -56,7 +56,7 @@ const detailedHealthRoute = new Route('/health/detailed', RequestType.GET)
     });
 
 // GET /health/ready — readiness check
-const readinessRoute = new Route('/health/ready', RequestType.GET)
+const readinessRoute = new HTTPServer.Route('/health/ready', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         // In a real app, check database connections, external services, etc.
         const checks = {

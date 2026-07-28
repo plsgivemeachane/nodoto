@@ -1,11 +1,5 @@
-import { HTTPServer, Middlewares, RequestType, Route, RouteGroup, Validator, checkPermission, logger } from '../../';
-import type { User } from '../../';
-import {
-    NotFoundError,
-    UnauthorizedError,
-    ConflictError,
-    AppError
-} from '../../httpServer/errors/AppError';
+import { HTTPServer } from '../../';
+import type { User } from '../../httpServer/auth/rbac/types';
 import Joi from 'joi';
 import os from 'os';
 
@@ -33,7 +27,7 @@ const server = HTTPServer.getInstance();
 // ==========================================
 // Health Check Routes
 // ==========================================
-const healthRoute = new Route('/health', RequestType.GET)
+const healthRoute = new HTTPServer.Route('/health', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({
             status: 'healthy',
@@ -45,8 +39,8 @@ const healthRoute = new Route('/health', RequestType.GET)
 // ==========================================
 // Auth Routes (public)
 // ==========================================
-const registerRoute = new Route('/auth/register', RequestType.POST)
-    .route(Validator.validate({
+const registerRoute = new HTTPServer.Route('/auth/register', HTTPServer.RequestType.POST)
+    .route(HTTPServer.Validator.validate({
         body: Joi.object({
             username: Joi.string().alphanum().min(3).max(30).required(),
             password: Joi.string().min(6).required(),
@@ -56,7 +50,7 @@ const registerRoute = new Route('/auth/register', RequestType.POST)
     .route(async (req, res) => {
         const body = req.getRequest().body;
         if (users.has(body.username)) {
-            throw new ConflictError('Username already taken');
+            throw new HTTPServer.ConflictError('Username already taken');
         }
         const userId = Date.now().toString();
         users.set(body.username, {
@@ -65,15 +59,15 @@ const registerRoute = new Route('/auth/register', RequestType.POST)
             password: body.password,
             roles: [body.role]
         });
-        logger.info(`[Example] User registered: ${body.username}`);
+        HTTPServer.Logger.info(`[Example] User registered: ${body.username}`);
         return res.send({
             message: 'Registered successfully',
             user: { id: userId, username: body.username, roles: [body.role] }
         });
     });
 
-const loginRoute = new Route('/auth/login', RequestType.POST)
-    .route(Validator.validate({
+const loginRoute = new HTTPServer.Route('/auth/login', HTTPServer.RequestType.POST)
+    .route(HTTPServer.Validator.validate({
         body: Joi.object({
             username: Joi.string().required(),
             password: Joi.string().required()
@@ -83,7 +77,7 @@ const loginRoute = new Route('/auth/login', RequestType.POST)
         const body = req.getRequest().body;
         const user = users.get(body.username);
         if (!user || user.password !== body.password) {
-            throw new UnauthorizedError('Invalid credentials');
+            throw new HTTPServer.UnauthorizedError('Invalid credentials');
         }
         const userContext: User = {
             id: user.id,
@@ -100,9 +94,9 @@ const loginRoute = new Route('/auth/login', RequestType.POST)
 // ==========================================
 // Post Routes (protected with auth + RBAC + validation)
 // ==========================================
-const listPostsRoute = new Route('/posts', RequestType.GET)
-    .route(Middlewares.auth)
-    .route(checkPermission('read', 'posts'))
+const listPostsRoute = new HTTPServer.Route('/posts', HTTPServer.RequestType.GET)
+    .route(HTTPServer.Middlewares.auth)
+    .route(HTTPServer.checkPermission('read', 'posts'))
     .route(async (req, res) => {
         return res.send({
             posts: Array.from(posts.values()),
@@ -110,10 +104,10 @@ const listPostsRoute = new Route('/posts', RequestType.GET)
         });
     });
 
-const createPostRoute = new Route('/posts', RequestType.POST)
-    .route(Middlewares.auth)
-    .route(checkPermission('create', 'posts'))
-    .route(Validator.validate({
+const createPostRoute = new HTTPServer.Route('/posts', HTTPServer.RequestType.POST)
+    .route(HTTPServer.Middlewares.auth)
+    .route(HTTPServer.checkPermission('create', 'posts'))
+    .route(HTTPServer.Validator.validate({
         body: Joi.object({
             title: Joi.string().min(1).max(200).required(),
             content: Joi.string().min(1).required()
@@ -128,20 +122,20 @@ const createPostRoute = new Route('/posts', RequestType.POST)
         return res.send({ message: 'Post created', post });
     });
 
-const getPostRoute = new Route('/posts/:id', RequestType.GET)
-    .route(Middlewares.auth)
-    .route(checkPermission('read', 'posts'))
+const getPostRoute = new HTTPServer.Route('/posts/:id', HTTPServer.RequestType.GET)
+    .route(HTTPServer.Middlewares.auth)
+    .route(HTTPServer.checkPermission('read', 'posts'))
     .route(async (req, res) => {
         const id = parseInt(req.getRequest().params.id);
         const post = posts.get(id);
-        if (!post) throw new NotFoundError(`Post ${id} not found`);
+        if (!post) throw new HTTPServer.NotFoundError(`Post ${id} not found`);
         return res.send({ post });
     });
 
-const updatePostRoute = new Route('/posts/:id', RequestType.PUT)
-    .route(Middlewares.auth)
-    .route(checkPermission('update', 'posts'))
-    .route(Validator.validate({
+const updatePostRoute = new HTTPServer.Route('/posts/:id', HTTPServer.RequestType.PUT)
+    .route(HTTPServer.Middlewares.auth)
+    .route(HTTPServer.checkPermission('update', 'posts'))
+    .route(HTTPServer.Validator.validate({
         body: Joi.object({
             title: Joi.string().min(1).max(200),
             content: Joi.string().min(1)
@@ -150,7 +144,7 @@ const updatePostRoute = new Route('/posts/:id', RequestType.PUT)
     .route(async (req, res) => {
         const id = parseInt(req.getRequest().params.id);
         const post = posts.get(id);
-        if (!post) throw new NotFoundError(`Post ${id} not found`);
+        if (!post) throw new HTTPServer.NotFoundError(`Post ${id} not found`);
         const body = req.getRequest().body;
         if (body.title) post.title = body.title;
         if (body.content) post.content = body.content;
@@ -158,12 +152,12 @@ const updatePostRoute = new Route('/posts/:id', RequestType.PUT)
         return res.send({ message: 'Post updated', post });
     });
 
-const deletePostRoute = new Route('/posts/:id', RequestType.DELETE)
-    .route(Middlewares.auth)
-    .route(checkPermission('delete', 'posts'))
+const deletePostRoute = new HTTPServer.Route('/posts/:id', HTTPServer.RequestType.DELETE)
+    .route(HTTPServer.Middlewares.auth)
+    .route(HTTPServer.checkPermission('delete', 'posts'))
     .route(async (req, res) => {
         const id = parseInt(req.getRequest().params.id);
-        if (!posts.has(id)) throw new NotFoundError(`Post ${id} not found`);
+        if (!posts.has(id)) throw new HTTPServer.NotFoundError(`Post ${id} not found`);
         posts.delete(id);
         return res.send({ message: 'Post deleted', id });
     });
@@ -171,14 +165,14 @@ const deletePostRoute = new Route('/posts/:id', RequestType.DELETE)
 // ==========================================
 // Error demo route
 // ==========================================
-const errorDemoRoute = new Route('/error-demo/:type', RequestType.GET)
+const errorDemoRoute = new HTTPServer.Route('/error-demo/:type', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         const type = req.getRequest().params.type;
         switch (type) {
-            case 'notfound': throw new NotFoundError('Resource not found');
-            case 'unauthorized': throw new UnauthorizedError('Not authorized');
-            case 'conflict': throw new ConflictError('Resource conflict');
-            case 'custom': throw new AppError('Custom error', 418);
+            case 'notfound': throw new HTTPServer.NotFoundError('Resource not found');
+            case 'unauthorized': throw new HTTPServer.UnauthorizedError('Not authorized');
+            case 'conflict': throw new HTTPServer.ConflictError('Resource conflict');
+            case 'custom': throw new HTTPServer.AppError('Custom error', 418);
             default: throw new Error('Unexpected error');
         }
     });
@@ -186,10 +180,10 @@ const errorDemoRoute = new Route('/error-demo/:type', RequestType.GET)
 // ==========================================
 // Register all routes
 // ==========================================
-const authGroup = new RouteGroup('/auth');
+const authGroup = new HTTPServer.RouteGroup('/auth');
 authGroup.route(registerRoute, loginRoute);
 
-const apiGroup = new RouteGroup('/api');
+const apiGroup = new HTTPServer.RouteGroup('/api');
 apiGroup.route(
     listPostsRoute,
     createPostRoute,
@@ -203,6 +197,6 @@ server.addRoute(healthRoute);
 server.addRoute(authGroup);
 server.addRoute(apiGroup);
 
-logger.info('[Example] Combined example running on port 3000');
-logger.info('[Example] Flow: POST /auth/register -> POST /auth/login -> GET/POST/PUT/DELETE /api/posts');
+HTTPServer.Logger.info('[Example] Combined example running on port 3000');
+HTTPServer.Logger.info('[Example] Flow: POST /auth/register -> POST /auth/login -> GET/POST/PUT/DELETE /api/posts');
 server.start();

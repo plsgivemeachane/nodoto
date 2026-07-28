@@ -1,4 +1,4 @@
-import { FileUpload, HTTPServer, RequestType, Route, logger } from '../../';
+import { HTTPServer } from '../../';
 import fs from 'fs';
 import path from 'path';
 
@@ -18,8 +18,8 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 
 // POST /upload/single — single file upload
-const singleUploadRoute = new Route('/upload/single', RequestType.POST)
-    .route(FileUpload.single('file', {
+const singleUploadRoute = new HTTPServer.Route('/upload/single', HTTPServer.RequestType.POST)
+    .route(HTTPServer.FileUpload.single('file', {
         dest: uploadDir,
         limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
         allowedTypes: ['image/jpeg', 'image/png', 'application/pdf']
@@ -29,7 +29,7 @@ const singleUploadRoute = new Route('/upload/single', RequestType.POST)
         if (!file) {
             return res.json({ error: 'No file uploaded or invalid type' }, 400);
         }
-        logger.info(`[Example] File uploaded: ${file.originalname} -> ${file.filename}`);
+        HTTPServer.Logger.info(`[Example] File uploaded: ${file.originalname} -> ${file.filename}`);
         return res.send({
             message: 'File uploaded successfully',
             file: {
@@ -42,8 +42,8 @@ const singleUploadRoute = new Route('/upload/single', RequestType.POST)
     });
 
 // POST /upload/multiple — multiple file upload (up to 5)
-const multiUploadRoute = new Route('/upload/multiple', RequestType.POST)
-    .route(FileUpload.array('files', 5, {
+const multiUploadRoute = new HTTPServer.Route('/upload/multiple', HTTPServer.RequestType.POST)
+    .route(HTTPServer.FileUpload.array('files', 5, {
         dest: uploadDir,
         limits: { fileSize: 10 * 1024 * 1024 } // 10MB each
     }))
@@ -63,7 +63,7 @@ const multiUploadRoute = new Route('/upload/multiple', RequestType.POST)
     });
 
 // GET /uploads — list uploaded files
-const listFilesRoute = new Route('/uploads', RequestType.GET)
+const listFilesRoute = new HTTPServer.Route('/uploads', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         const files = fs.existsSync(uploadDir) ? fs.readdirSync(uploadDir) : [];
         return res.send({ files });

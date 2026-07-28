@@ -1,5 +1,5 @@
-import { ConflictError, HTTPServer, Middlewares, NotFoundError, RBACManager, RequestType, Route, UnauthorizedError, Validator, checkPermission, logger } from '../../';
-import type { User } from '../../';
+import { HTTPServer } from '../../';
+import type { User } from '../../httpServer/auth/rbac/types';
 import Joi from 'joi';
 
 // In-memory user store (in production, use a database)
@@ -18,8 +18,8 @@ const server = HTTPServer.getInstance();
 // --- Auth Routes ---
 
 // POST /register — register a new user
-const registerRoute = new Route('/register', RequestType.POST)
-    .route(Validator.validate({
+const registerRoute = new HTTPServer.Route('/register', HTTPServer.RequestType.POST)
+    .route(HTTPServer.Validator.validate({
         body: Joi.object({
             username: Joi.string().alphanum().min(3).max(30).required(),
             password: Joi.string().min(6).required(),
@@ -31,7 +31,7 @@ const registerRoute = new Route('/register', RequestType.POST)
 
         // Check if user exists
         if (users.has(body.username)) {
-            throw new ConflictError('Username already taken');
+            throw new HTTPServer.ConflictError('Username already taken');
         }
 
         // Create user
@@ -43,7 +43,7 @@ const registerRoute = new Route('/register', RequestType.POST)
             roles: [body.role]
         };
         users.set(body.username, user);
-        logger.info(`[Example] User registered: ${body.username} (${body.role})`);
+        HTTPServer.Logger.info(`[Example] User registered: ${body.username} (${body.role})`);
 
         return res.send({
             message: 'User registered successfully',
@@ -52,8 +52,8 @@ const registerRoute = new Route('/register', RequestType.POST)
     });
 
 // POST /login — login and set user context
-const loginRoute = new Route('/login', RequestType.POST)
-    .route(Validator.validate({
+const loginRoute = new HTTPServer.Route('/login', HTTPServer.RequestType.POST)
+    .route(HTTPServer.Validator.validate({
         body: Joi.object({
             username: Joi.string().required(),
             password: Joi.string().required()
@@ -64,7 +64,7 @@ const loginRoute = new Route('/login', RequestType.POST)
         const user = users.get(body.username);
 
         if (!user || user.password !== body.password) {
-            throw new UnauthorizedError('Invalid username or password');
+            throw new HTTPServer.UnauthorizedError('Invalid username or password');
         }
 
         // Set user in request context (in production: generate JWT token)
@@ -75,7 +75,7 @@ const loginRoute = new Route('/login', RequestType.POST)
         };
         req.setUser(userContext);
 
-        logger.info(`[Example] User logged in: ${user.username}`);
+        HTTPServer.Logger.info(`[Example] User logged in: ${user.username}`);
         return res.send({
             message: 'Login successful',
             user: { id: user.id, username: user.username, roles: user.roles }
@@ -83,12 +83,12 @@ const loginRoute = new Route('/login', RequestType.POST)
     });
 
 // GET /me — get current user (requires auth)
-const meRoute = new Route('/me', RequestType.GET)
-    .route(Middlewares.auth)
+const meRoute = new HTTPServer.Route('/me', HTTPServer.RequestType.GET)
+    .route(HTTPServer.Middlewares.auth)
     .route(async (req, res) => {
         const user = req.getUser();
         if (!user) {
-            throw new UnauthorizedError('Not authenticated');
+            throw new HTTPServer.UnauthorizedError('Not authenticated');
         }
         return res.send({ user });
     });
@@ -96,9 +96,9 @@ const meRoute = new Route('/me', RequestType.GET)
 // --- Protected Resource Routes ---
 
 // GET /posts — requires auth + read permission
-const postsRoute = new Route('/posts', RequestType.GET)
-    .route(Middlewares.auth)
-    .route(checkPermission('read', 'posts'))
+const postsRoute = new HTTPServer.Route('/posts', HTTPServer.RequestType.GET)
+    .route(HTTPServer.Middlewares.auth)
+    .route(HTTPServer.checkPermission('read', 'posts'))
     .route(async (req, res) => {
         return res.send({
             posts: [
@@ -109,10 +109,10 @@ const postsRoute = new Route('/posts', RequestType.GET)
     });
 
 // POST /posts — requires auth + create permission
-const createPostRoute = new Route('/posts', RequestType.POST)
-    .route(Middlewares.auth)
-    .route(checkPermission('create', 'posts'))
-    .route(Validator.validate({
+const createPostRoute = new HTTPServer.Route('/posts', HTTPServer.RequestType.POST)
+    .route(HTTPServer.Middlewares.auth)
+    .route(HTTPServer.checkPermission('create', 'posts'))
+    .route(HTTPServer.Validator.validate({
         body: Joi.object({
             title: Joi.string().min(1).max(200).required(),
             content: Joi.string().required()
@@ -128,20 +128,20 @@ const createPostRoute = new Route('/posts', RequestType.POST)
     });
 
 // DELETE /posts/:id — requires auth + delete permission (admin only by default)
-const deletePostRoute = new Route('/posts/:id', RequestType.DELETE)
-    .route(Middlewares.auth)
-    .route(checkPermission('delete', 'posts'))
+const deletePostRoute = new HTTPServer.Route('/posts/:id', HTTPServer.RequestType.DELETE)
+    .route(HTTPServer.Middlewares.auth)
+    .route(HTTPServer.checkPermission('delete', 'posts'))
     .route(async (req, res) => {
         const id = req.getRequest().params.id;
         return res.send({ message: `Post ${id} deleted` });
     });
 
 // GET /roles — list all available roles (admin only)
-const rolesRoute = new Route('/roles', RequestType.GET)
-    .route(Middlewares.auth)
+const rolesRoute = new HTTPServer.Route('/roles', HTTPServer.RequestType.GET)
+    .route(HTTPServer.Middlewares.auth)
     .route(async (req, res) => {
         // Demonstrate checking RBAC manager directly
-        const rbac = RBACManager.getInstance();
+        const rbac = HTTPServer.RBAC.getInstance();
         const user = req.getUser()!;
         const isAdmin = rbac.can(user, 'read', 'users');
 
@@ -164,6 +164,6 @@ server.addRoute(createPostRoute);
 server.addRoute(deletePostRoute);
 server.addRoute(rolesRoute);
 
-logger.info('[Example] Full user pipeline example running on port 3000');
-logger.info('[Example] Try: POST /register -> POST /login -> GET /me -> GET /posts');
+HTTPServer.Logger.info('[Example] Full user pipeline example running on port 3000');
+HTTPServer.Logger.info('[Example] Try: POST /register -> POST /login -> GET /me -> GET /posts');
 server.start();

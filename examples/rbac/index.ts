@@ -1,5 +1,4 @@
-import { HTTPServer, Middlewares, RequestType, Route, checkPermission, logger } from '../../';
-import type { User } from '../../';
+import { HTTPServer } from '../../';
 
 // Initialize server
 HTTPServer.init({
@@ -11,15 +10,15 @@ const server = HTTPServer.getInstance();
 
 // Create routes with RBAC
 /**
- * Route for fetching posts with the following steps:
+ * HTTPServer.Route for fetching posts with the following steps:
  * 1. Authenticates the request.
  * 2. Checks the user's permission to read posts.
  * 3. Responds with a list of posts if all checks pass.
  */
-const postsRoute = new Route('/posts', RequestType.GET)
-    // .route(Middlewares.timeout())
-    .route(Middlewares.auth) // First authenticate
-    .route(checkPermission('read', 'posts')) // Then check permission
+const postsRoute = new HTTPServer.Route('/posts', HTTPServer.RequestType.GET)
+    // .route(HTTPServer.Middlewares.timeout())
+    .route(HTTPServer.Middlewares.auth) // First authenticate
+    .route(HTTPServer.checkPermission('read', 'posts')) // Then check permission
     .route(async (req, res) => {
         return res.send({
             posts: [
@@ -29,9 +28,9 @@ const postsRoute = new Route('/posts', RequestType.GET)
         });
     });
 
-const createPostRoute = new Route('/posts', RequestType.POST)
-    .route(Middlewares.auth)
-    .route(Middlewares.rbacCheckPerm('create', 'posts'))
+const createPostRoute = new HTTPServer.Route('/posts', HTTPServer.RequestType.POST)
+    .route(HTTPServer.Middlewares.auth)
+    .route(HTTPServer.Middlewares.rbacCheckPerm('create', 'posts'))
     .route(async (req, res) => {
         // Editor can create posts
         return res.send({
@@ -40,9 +39,9 @@ const createPostRoute = new Route('/posts', RequestType.POST)
         });
     });
 
-const deletePostRoute = new Route('/posts/:id', RequestType.DELETE)
-    .route(Middlewares.auth)
-    .route(Middlewares.rbacCheckPerm('delete', 'posts'))
+const deletePostRoute = new HTTPServer.Route('/posts/:id', HTTPServer.RequestType.DELETE)
+    .route(HTTPServer.Middlewares.auth)
+    .route(HTTPServer.Middlewares.rbacCheckPerm('delete', 'posts'))
     .route(async (req, res) => {
         // Only admin can delete posts
         // This will fail for editor role

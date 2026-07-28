@@ -1,4 +1,4 @@
-import { HTTPServer, RequestType, Route, ThreadPool, Validator, logger } from '../../';
+import { HTTPServer } from '../../';
 import Joi from 'joi';
 
 // === WORKER THREAD SERVER TEMPLATE ===
@@ -12,11 +12,11 @@ HTTPServer.init({
     corsSetting: { origin: '*' }
 });
 const server = HTTPServer.getInstance();
-const pool = ThreadPool.getInstance(4);
+const pool = HTTPServer.ThreadPool.getInstance(4);
 
 // POST /compute — run a CPU-bound task in a worker thread
-const computeRoute = new Route('/compute', RequestType.POST)
-    .route(Validator.validate({
+const computeRoute = new HTTPServer.Route('/compute', HTTPServer.RequestType.POST)
+    .route(HTTPServer.Validator.validate({
         body: Joi.object({
             iterations: Joi.number().integer().min(1).max(100000000).default(1000000)
         })
@@ -39,7 +39,7 @@ const computeRoute = new Route('/compute', RequestType.POST)
     });
 
 // GET /workers — check thread pool status
-const workersStatusRoute = new Route('/workers', RequestType.GET)
+const workersStatusRoute = new HTTPServer.Route('/workers', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({
             maxWorkers: pool.getMaxWorkers(),
@@ -47,7 +47,7 @@ const workersStatusRoute = new Route('/workers', RequestType.GET)
         });
     });
 
-const health = new Route('/health', RequestType.GET)
+const health = new HTTPServer.Route('/health', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({
             status: 'healthy',
@@ -62,5 +62,5 @@ server.addRoute(health);
 server.addRoute(computeRoute);
 server.addRoute(workersStatusRoute);
 
-logger.info('[Template] Worker Thread Server running on port 3000');
+HTTPServer.Logger.info('[Template] Worker Thread Server running on port 3000');
 server.start();

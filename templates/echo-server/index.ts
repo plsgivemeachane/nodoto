@@ -1,4 +1,4 @@
-import { HTTPServer, RequestType, Route } from '../../';
+import { HTTPServer } from '../../';
 
 // === ECHO SERVER TEMPLATE ===
 // Minimal server that echoes requests back.
@@ -15,7 +15,7 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 
 // Echo for all methods
-const echoRoute = new Route('/', RequestType.GET)
+const echoRoute = new HTTPServer.Route('/', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         const r = req.getRequest();
         return res.send({
@@ -28,13 +28,13 @@ const echoRoute = new Route('/', RequestType.GET)
         });
     });
 
-const echoPostRoute = new Route('/', RequestType.POST)
+const echoPostRoute = new HTTPServer.Route('/', HTTPServer.RequestType.POST)
     .route(async (req, res) => {
         const r = req.getRequest();
         return res.send({ method: 'POST', body: r.body, headers: r.headers });
     });
 
-const echoParamRoute = new Route('/echo/:msg', RequestType.GET)
+const echoParamRoute = new HTTPServer.Route('/echo/:msg', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({
             echo: req.getRequest().params.msg,

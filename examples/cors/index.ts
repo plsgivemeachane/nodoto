@@ -1,4 +1,4 @@
-import { HTTPServer, RequestType, Route, RouteGroup } from '../../';
+import { HTTPServer } from '../../';
 
 // Initialize server with CORS enabled
 HTTPServer.init({
@@ -17,7 +17,7 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 
 // Root route
-const rootRoute = new Route('/', RequestType.GET)
+const rootRoute = new HTTPServer.Route('/', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({
             message: 'CORS is enabled on this server',
@@ -29,26 +29,26 @@ const rootRoute = new Route('/', RequestType.GET)
     });
 
 // API v1 route group
-const apiV1 = new RouteGroup('/api/v1');
+const apiV1 = new HTTPServer.RouteGroup('/api/v1');
 apiV1.route(
-    new Route('/health', RequestType.GET)
+    new HTTPServer.Route('/health', HTTPServer.RequestType.GET)
         .route(async (req, res) => {
             return res.send({ status: 'healthy', version: 'v1' });
         }),
-    new Route('/info', RequestType.GET)
+    new HTTPServer.Route('/info', HTTPServer.RequestType.GET)
         .route(async (req, res) => {
             return res.send({ name: 'nodoto-cors-example', version: '1.0.0' });
         })
 );
 
 // API v2 route group (nested)
-const apiV2 = new RouteGroup('/api/v2');
+const apiV2 = new HTTPServer.RouteGroup('/api/v2');
 apiV2.route(
-    new Route('/health', RequestType.GET)
+    new HTTPServer.Route('/health', HTTPServer.RequestType.GET)
         .route(async (req, res) => {
             return res.send({ status: 'healthy', version: 'v2' });
         }),
-    new Route('/users', RequestType.GET)
+    new HTTPServer.Route('/users', HTTPServer.RequestType.GET)
         .route(async (req, res) => {
             return res.send({
                 users: [

@@ -1,4 +1,4 @@
-import { HTTPServer, Route, RequestType, Validator, logger } from '../../';
+import { HTTPServer } from '../../';
 import Joi from 'joi';
 
 // Initialize server
@@ -11,8 +11,8 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 
 // POST /users — validate body with Joi
-const createUserRoute = new Route('/users', RequestType.POST)
-    .route(Validator.validate({
+const createUserRoute = new HTTPServer.Route('/users', HTTPServer.RequestType.POST)
+    .route(HTTPServer.Validator.validate({
         body: Joi.object({
             username: Joi.string().alphanum().min(3).max(30).required(),
             email: Joi.string().email().required(),
@@ -21,7 +21,7 @@ const createUserRoute = new Route('/users', RequestType.POST)
     }))
     .route(async (req, res) => {
         const body = req.getRequest().body;
-        logger.info(`[Example] Creating user: ${body.username}`);
+        HTTPServer.Logger.info(`[Example] Creating user: ${body.username}`);
         return res.send({
             message: 'User created',
             user: { id: Date.now(), username: body.username, email: body.email }
@@ -29,8 +29,8 @@ const createUserRoute = new Route('/users', RequestType.POST)
     });
 
 // GET /search — validate query params
-const searchRoute = new Route('/search', RequestType.GET)
-    .route(Validator.validate({
+const searchRoute = new HTTPServer.Route('/search', HTTPServer.RequestType.GET)
+    .route(HTTPServer.Validator.validate({
         query: Joi.object({
             q: Joi.string().min(1).required(),
             page: Joi.number().integer().min(1).default(1),

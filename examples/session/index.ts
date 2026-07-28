@@ -1,4 +1,4 @@
-import { HTTPServer, RequestType, Route, SessionManager, logger } from '../../';
+import { HTTPServer } from '../../';
 import express from 'express';
 
 // Initialize server
@@ -11,7 +11,7 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 
 // Initialize session manager
-const sessionMiddleware = SessionManager.getInstance().init({
+const sessionMiddleware = HTTPServer.Session.getInstance().init({
     secret: 'my-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
@@ -28,7 +28,7 @@ const sessionMiddleware = SessionManager.getInstance().init({
 // In this example, we'll use the session within route handlers.
 
 // GET / — check session
-const checkSessionRoute = new Route('/', RequestType.GET)
+const checkSessionRoute = new HTTPServer.Route('/', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         const expressReq = req.getRequest();
         const session = (expressReq as any).session;
@@ -40,7 +40,7 @@ const checkSessionRoute = new Route('/', RequestType.GET)
     });
 
 // POST /login — set session
-const loginRoute = new Route('/login', RequestType.POST)
+const loginRoute = new HTTPServer.Route('/login', HTTPServer.RequestType.POST)
     .route(async (req, res) => {
         const expressReq = req.getRequest();
         const body = expressReq.body;
@@ -53,7 +53,7 @@ const loginRoute = new Route('/login', RequestType.POST)
 
         session.userId = body.username;
         session.role = 'user';
-        logger.info(`[Example] User logged in: ${body.username}`);
+        HTTPServer.Logger.info(`[Example] User logged in: ${body.username}`);
         return res.send({
             message: 'Logged in successfully',
             user: { username: body.username }
@@ -61,20 +61,20 @@ const loginRoute = new Route('/login', RequestType.POST)
     });
 
 // POST /logout — destroy session
-const logoutRoute = new Route('/logout', RequestType.POST)
+const logoutRoute = new HTTPServer.Route('/logout', HTTPServer.RequestType.POST)
     .route(async (req, res) => {
         const expressReq = req.getRequest();
         const session = (expressReq as any).session;
         session?.destroy((err: any) => {
             if (err) {
-                logger.error(`[Example] Session destroy error: ${err.message}`);
+                HTTPServer.Logger.error(`[Example] Session destroy error: ${err.message}`);
             }
         });
         return res.send({ message: 'Logged out successfully' });
     });
 
 // GET /profile — protected route (requires session)
-const profileRoute = new Route('/profile', RequestType.GET)
+const profileRoute = new HTTPServer.Route('/profile', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         const expressReq = req.getRequest();
         const session = (expressReq as any).session;
@@ -97,6 +97,6 @@ server.addRoute(profileRoute);
 // Note: For sessions to work, you need to apply the session middleware
 // to the Express app. This requires modifying HTTPServer.start() to accept
 // pre-start middleware, or applying it manually.
-// For now, this example shows the SessionManager API usage.
+// For now, this example shows the HTTPServer.Session API usage.
 
 server.start();

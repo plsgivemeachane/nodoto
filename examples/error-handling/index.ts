@@ -1,13 +1,4 @@
-import { HTTPServer, RequestType, Route } from '../../';
-import {
-    AppError,
-    ValidationError,
-    UnauthorizedError,
-    ForbiddenError,
-    NotFoundError,
-    ConflictError,
-    RateLimitError
-} from '../../httpServer/errors/AppError';
+import { HTTPServer } from '../../';
 
 // Initialize server
 HTTPServer.init({
@@ -19,57 +10,57 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 
 // GET / — normal response
-const helloRoute = new Route('/', RequestType.GET)
+const helloRoute = new HTTPServer.Route('/', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({ message: 'Hello! Try the error endpoints.' });
     });
 
 // GET /error/validation — 400
-const validationErrorRoute = new Route('/error/validation', RequestType.GET)
+const validationErrorRoute = new HTTPServer.Route('/error/validation', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
-        throw new ValidationError('Username is required');
+        throw new HTTPServer.ValidationError('Username is required');
     });
 
 // GET /error/unauthorized — 401
-const unauthorizedRoute = new Route('/error/unauthorized', RequestType.GET)
+const unauthorizedRoute = new HTTPServer.Route('/error/unauthorized', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
-        throw new UnauthorizedError('You must log in first');
+        throw new HTTPServer.UnauthorizedError('You must log in first');
     });
 
 // GET /error/forbidden — 403
-const forbiddenRoute = new Route('/error/forbidden', RequestType.GET)
+const forbiddenRoute = new HTTPServer.Route('/error/forbidden', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
-        throw new ForbiddenError('You do not have access to this resource');
+        throw new HTTPServer.ForbiddenError('You do not have access to this resource');
     });
 
 // GET /error/notfound — 404
-const notFoundRoute = new Route('/error/notfound', RequestType.GET)
+const notFoundRoute = new HTTPServer.Route('/error/notfound', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
-        throw new NotFoundError('User not found');
+        throw new HTTPServer.NotFoundError('User not found');
     });
 
 // GET /error/conflict — 409
-const conflictRoute = new Route('/error/conflict', RequestType.GET)
+const conflictRoute = new HTTPServer.Route('/error/conflict', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
-        throw new ConflictError('Email already registered');
+        throw new HTTPServer.ConflictError('Email already registered');
     });
 
 // GET /error/ratelimit — 429
-const rateLimitRoute = new Route('/error/ratelimit', RequestType.GET)
+const rateLimitRoute = new HTTPServer.Route('/error/ratelimit', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
-        throw new RateLimitError('Too many requests, slow down');
+        throw new HTTPServer.RateLimitError('Too many requests, slow down');
     });
 
 // GET /error/internal — 500 (unexpected error)
-const internalErrorRoute = new Route('/error/internal', RequestType.GET)
+const internalErrorRoute = new HTTPServer.Route('/error/internal', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         throw new Error('Something went horribly wrong');
     });
 
-// GET /error/custom — custom AppError
-const customErrorRoute = new Route('/error/custom', RequestType.GET)
+// GET /error/custom — custom HTTPServer.AppError
+const customErrorRoute = new HTTPServer.Route('/error/custom', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
-        throw new AppError('Payment required', 402);
+        throw new HTTPServer.AppError('Payment required', 402);
     });
 
 server.addRoute(helloRoute);
@@ -82,8 +73,8 @@ server.addRoute(rateLimitRoute);
 server.addRoute(internalErrorRoute);
 server.addRoute(customErrorRoute);
 
-// Note: In a real app, you'd wrap route handlers with ErrorHandler.
+// Note: In a real app, you'd wrap route handlers with HTTPServer.ErrorHandler.
 // This example shows how to throw each error type.
-// ErrorHandler.handle(error, nres) can be called in catch blocks.
+// HTTPServer.ErrorHandler.handle(error, nres) can be called in catch blocks.
 
 server.start();

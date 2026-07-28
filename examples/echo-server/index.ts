@@ -1,4 +1,4 @@
-import { HTTPServer, RequestType, Route, logger } from '../../';
+import { HTTPServer } from '../../';
 
 // Initialize server
 HTTPServer.init({
@@ -12,7 +12,7 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 
 // GET / — echo query params and headers
-const echoGetRoute = new Route('/', RequestType.GET)
+const echoGetRoute = new HTTPServer.Route('/', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         const expressReq = req.getRequest();
         return res.send({
@@ -25,7 +25,7 @@ const echoGetRoute = new Route('/', RequestType.GET)
     });
 
 // POST / — echo body
-const echoPostRoute = new Route('/', RequestType.POST)
+const echoPostRoute = new HTTPServer.Route('/', HTTPServer.RequestType.POST)
     .route(async (req, res) => {
         const expressReq = req.getRequest();
         return res.send({
@@ -38,7 +38,7 @@ const echoPostRoute = new Route('/', RequestType.POST)
     });
 
 // PUT / — echo body
-const echoPutRoute = new Route('/', RequestType.PUT)
+const echoPutRoute = new HTTPServer.Route('/', HTTPServer.RequestType.PUT)
     .route(async (req, res) => {
         const expressReq = req.getRequest();
         return res.send({
@@ -48,7 +48,7 @@ const echoPutRoute = new Route('/', RequestType.PUT)
     });
 
 // PATCH / — echo body
-const echoPatchRoute = new Route('/', RequestType.PATCH)
+const echoPatchRoute = new HTTPServer.Route('/', HTTPServer.RequestType.PATCH)
     .route(async (req, res) => {
         const expressReq = req.getRequest();
         return res.send({
@@ -58,7 +58,7 @@ const echoPatchRoute = new Route('/', RequestType.PATCH)
     });
 
 // DELETE / — echo params
-const echoDeleteRoute = new Route('/', RequestType.DELETE)
+const echoDeleteRoute = new HTTPServer.Route('/', HTTPServer.RequestType.DELETE)
     .route(async (req, res) => {
         const expressReq = req.getRequest();
         return res.send({
@@ -69,13 +69,13 @@ const echoDeleteRoute = new Route('/', RequestType.DELETE)
     });
 
 // HEAD / — echo with no body
-const echoHeadRoute = new Route('/', RequestType.HEAD)
+const echoHeadRoute = new HTTPServer.Route('/', HTTPServer.RequestType.HEAD)
     .route(async (req, res) => {
         return res.send({ method: 'HEAD', timestamp: Date.now() });
     });
 
 // Any path echo
-const echoAnyRoute = new Route('/echo/:anything', RequestType.GET)
+const echoAnyRoute = new HTTPServer.Route('/echo/:anything', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         const expressReq = req.getRequest();
         return res.send({
@@ -92,5 +92,5 @@ server.addRoute(echoDeleteRoute);
 server.addRoute(echoHeadRoute);
 server.addRoute(echoAnyRoute);
 
-logger.info('[Example] Echo server running. Send any request to get it echoed back.');
+HTTPServer.Logger.info('[Example] Echo server running. Send any request to get it echoed back.');
 server.start();

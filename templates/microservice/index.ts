@@ -1,4 +1,4 @@
-import { HTTPServer, RequestType, Route } from '../../';
+import { HTTPServer } from '../../';
 import os from 'os';
 
 // === MICROSERVICE STARTER TEMPLATE ===
@@ -13,7 +13,7 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 const startTime = Date.now();
 
-const health = new Route('/health', RequestType.GET)
+const health = new HTTPServer.Route('/health', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({
             status: 'healthy',
@@ -24,12 +24,12 @@ const health = new Route('/health', RequestType.GET)
         });
     });
 
-const ready = new Route('/ready', RequestType.GET)
+const ready = new HTTPServer.Route('/ready', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({ ready: true, timestamp: Date.now() });
     });
 
-const root = new Route('/', RequestType.GET)
+const root = new HTTPServer.Route('/', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({
             service: 'microservice-starter',

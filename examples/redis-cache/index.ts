@@ -1,4 +1,4 @@
-import { HTTPServer, RedisHelper, RequestType, Route, logger } from '../../';
+import { HTTPServer } from '../../';
 
 // Initialize server
 HTTPServer.init({
@@ -11,10 +11,10 @@ const server = HTTPServer.getInstance();
 
 // Connect to Redis
 // Make sure Redis is running on localhost:6379
-const redis = RedisHelper.getInstance();
+const redis = HTTPServer.Redis.getInstance();
 
 // GET /cache/:key — get value from Redis
-const getCacheRoute = new Route('/cache/:key', RequestType.GET)
+const getCacheRoute = new HTTPServer.Route('/cache/:key', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         try {
             await redis.connect({ url: 'redis://localhost:6379' });
@@ -36,7 +36,7 @@ const getCacheRoute = new Route('/cache/:key', RequestType.GET)
     });
 
 // POST /cache/:key — set value in Redis with optional TTL
-const setCacheRoute = new Route('/cache/:key', RequestType.POST)
+const setCacheRoute = new HTTPServer.Route('/cache/:key', HTTPServer.RequestType.POST)
     .route(async (req, res) => {
         try {
             await redis.connect({ url: 'redis://localhost:6379' });
@@ -49,7 +49,7 @@ const setCacheRoute = new Route('/cache/:key', RequestType.POST)
         const ttl = body.ttl ? parseInt(body.ttl) : undefined;
 
         await redis.set(key, JSON.stringify(body.value), ttl);
-        logger.info(`[Example] Set cache key: ${key}, TTL: ${ttl || 'none'}`);
+        HTTPServer.Logger.info(`[Example] Set cache key: ${key}, TTL: ${ttl || 'none'}`);
 
         return res.send({
             message: 'Cached successfully',
@@ -59,7 +59,7 @@ const setCacheRoute = new Route('/cache/:key', RequestType.POST)
     });
 
 // DELETE /cache/:key — delete from Redis
-const delCacheRoute = new Route('/cache/:key', RequestType.DELETE)
+const delCacheRoute = new HTTPServer.Route('/cache/:key', HTTPServer.RequestType.DELETE)
     .route(async (req, res) => {
         try {
             await redis.connect({ url: 'redis://localhost:6379' });
@@ -77,7 +77,7 @@ const delCacheRoute = new Route('/cache/:key', RequestType.DELETE)
     });
 
 // GET /cache/check/:key — check if key exists
-const existsCacheRoute = new Route('/cache/check/:key', RequestType.GET)
+const existsCacheRoute = new HTTPServer.Route('/cache/check/:key', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         try {
             await redis.connect({ url: 'redis://localhost:6379' });
@@ -95,7 +95,7 @@ const existsCacheRoute = new Route('/cache/check/:key', RequestType.GET)
     });
 
 // GET /redis/status — check connection status
-const statusRoute = new Route('/redis/status', RequestType.GET)
+const statusRoute = new HTTPServer.Route('/redis/status', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({
             connected: redis.isConnected()

@@ -1,4 +1,4 @@
-import { HTTPServer, RequestType, Route, Utils, logger } from '../../';
+import { HTTPServer } from '../../';
 // Initialize HTTP server
 HTTPServer.init({
     port: 3000,
@@ -12,9 +12,9 @@ HTTPServer.init({
 const server = HTTPServer.getInstance();
 
 // Create a simple Hello World route
-const helloRoute = new Route('/', RequestType.GET)
+const helloRoute = new HTTPServer.Route('/', HTTPServer.RequestType.GET)
 .route(async (req, res) => {
-    await Utils.sleep(1000); // Simulate some work
+    await HTTPServer.Utils.sleep(1000); // Simulate some work
     return res.send({
         message: 'Hello, World! Welcome to nodoto server.',
         timestamp: Date.now()

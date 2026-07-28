@@ -1,4 +1,4 @@
-import { HTTPServer, NotFoundError, RateLimiter, RequestType, Route, RouteGroup, Validator } from '../../';
+import { HTTPServer } from '../../';
 import Joi from 'joi';
 
 // === REST API SERVER TEMPLATE ===
@@ -18,23 +18,23 @@ HTTPServer.init({
 });
 const server = HTTPServer.getInstance();
 
-const listItems = new Route('/items', RequestType.GET)
-    .route(RateLimiter.create({ windowMs: 60000, max: 100 }))
+const listItems = new HTTPServer.Route('/items', HTTPServer.RequestType.GET)
+    .route(HTTPServer.RateLimiter.create({ windowMs: 60000, max: 100 }))
     .route(async (req, res) => {
         return res.send({ items: Array.from(items.values()), count: items.size });
     });
 
-const getItem = new Route('/items/:id', RequestType.GET)
+const getItem = new HTTPServer.Route('/items/:id', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         const id = parseInt(req.getRequest().params.id);
         const item = items.get(id);
-        if (!item) throw new NotFoundError(`Item ${id} not found`);
+        if (!item) throw new HTTPServer.NotFoundError(`Item ${id} not found`);
         return res.send({ item });
     });
 
-const createItem = new Route('/items', RequestType.POST)
-    .route(RateLimiter.create({ windowMs: 60000, max: 20 }))
-    .route(Validator.validate({
+const createItem = new HTTPServer.Route('/items', HTTPServer.RequestType.POST)
+    .route(HTTPServer.RateLimiter.create({ windowMs: 60000, max: 20 }))
+    .route(HTTPServer.Validator.validate({
         body: Joi.object({
             name: Joi.string().min(1).max(100).required(),
             description: Joi.string().max(500).default(''),
@@ -49,8 +49,8 @@ const createItem = new Route('/items', RequestType.POST)
         return res.send({ message: 'Item created', item });
     });
 
-const updateItem = new Route('/items/:id', RequestType.PUT)
-    .route(Validator.validate({
+const updateItem = new HTTPServer.Route('/items/:id', HTTPServer.RequestType.PUT)
+    .route(HTTPServer.Validator.validate({
         body: Joi.object({
             name: Joi.string().min(1).max(100),
             description: Joi.string().max(500),
@@ -60,7 +60,7 @@ const updateItem = new Route('/items/:id', RequestType.PUT)
     .route(async (req, res) => {
         const id = parseInt(req.getRequest().params.id);
         const item = items.get(id);
-        if (!item) throw new NotFoundError(`Item ${id} not found`);
+        if (!item) throw new HTTPServer.NotFoundError(`Item ${id} not found`);
         const body = req.getRequest().body;
         if (body.name) item.name = body.name;
         if (body.description) item.description = body.description;
@@ -69,20 +69,20 @@ const updateItem = new Route('/items/:id', RequestType.PUT)
         return res.send({ message: 'Item updated', item });
     });
 
-const deleteItem = new Route('/items/:id', RequestType.DELETE)
+const deleteItem = new HTTPServer.Route('/items/:id', HTTPServer.RequestType.DELETE)
     .route(async (req, res) => {
         const id = parseInt(req.getRequest().params.id);
-        if (!items.has(id)) throw new NotFoundError(`Item ${id} not found`);
+        if (!items.has(id)) throw new HTTPServer.NotFoundError(`Item ${id} not found`);
         items.delete(id);
         return res.send({ message: 'Item deleted', id });
     });
 
-const health = new Route('/health', RequestType.GET)
+const health = new HTTPServer.Route('/health', HTTPServer.RequestType.GET)
     .route(async (req, res) => {
         return res.send({ status: 'healthy', items: items.size });
     });
 
-const api = new RouteGroup('/api');
+const api = new HTTPServer.RouteGroup('/api');
 api.route(listItems, getItem, createItem, updateItem, deleteItem);
 
 server.addRoute(health);
