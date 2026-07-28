@@ -14,18 +14,15 @@ export class RBACManager {
     private roles: Map<string, Role> = new Map();
 
     private constructor() {
-        // Initialize with default roles
+        // Initialize with default roles (with hierarchy)
         this.addRole({
-            name: 'admin',
+            name: 'viewer',
             rules: [{
                 resource: 'posts',
-                permissions: ['create', 'read', 'update', 'delete']
-            }, {
-                resource: 'users',
-                permissions: ['create', 'read', 'update', 'delete']
+                permissions: ['read']
             }, {
                 resource: 'comments',
-                permissions: ['create', 'read', 'update', 'delete']
+                permissions: ['read']
             }]
         });
 
@@ -37,18 +34,23 @@ export class RBACManager {
             }, {
                 resource: 'comments',
                 permissions: ['create', 'read', 'update', 'delete']
-            }]
+            }],
+            inherits: ['viewer']
         });
 
         this.addRole({
-            name: 'viewer',
+            name: 'admin',
             rules: [{
                 resource: 'posts',
-                permissions: ['read']
+                permissions: ['create', 'read', 'update', 'delete']
+            }, {
+                resource: 'users',
+                permissions: ['create', 'read', 'update', 'delete']
             }, {
                 resource: 'comments',
-                permissions: ['read']
-            }]
+                permissions: ['create', 'read', 'update', 'delete']
+            }],
+            inherits: ['editor', 'viewer']
         });
     }
 
@@ -74,19 +76,48 @@ export class RBACManager {
 
     /**
      * Checks if a user has the given permission on the given resource.
+     * Supports role hierarchy via the inherits field.
      * @param user The user to check.
      * @param permission The permission to check for.
      * @param resource The resource to check against.
      * @returns True if the user has the permission, false otherwise.
      */
     public can(user: User, permission: Permission, resource: Resource): boolean {
+        const checked = new Set<string>();
         for (const roleName of user.roles) {
-            const role = this.roles.get(roleName);
-            if (!role) continue;
-
-            const rule = role.rules.find(r => r.resource === resource);
-            if (rule && rule.permissions.includes(permission)) {
+            if (this.checkRolePermission(roleName, permission, resource, checked)) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Recursively check a role and its inherited roles for a permission.
+     */
+    private checkRolePermission(
+        roleName: string,
+        permission: Permission,
+        resource: Resource,
+        checked: Set<string>
+    ): boolean {
+        if (checked.has(roleName)) return false;
+        checked.add(roleName);
+
+        const role = this.roles.get(roleName);
+        if (!role) return false;
+
+        const rule = role.rules.find(r => r.resource === resource);
+        if (rule && rule.permissions.includes(permission)) {
+            return true;
+        }
+
+        // Check inherited roles
+        if (role.inherits) {
+            for (const inheritedRole of role.inherits) {
+                if (this.checkRolePermission(inheritedRole, permission, resource, checked)) {
+                    return true;
+                }
             }
         }
         return false;

@@ -9,6 +9,9 @@ import { AppError, ValidationError, UnauthorizedError, ForbiddenError, NotFoundE
 import ErrorHandler from "./errors/ErrorHandler";
 import FileUpload from "./upload/FileUpload";
 import SessionManager from "./session/SessionManager";
+import SwaggerManager from "./docs/SwaggerManager";
+import RateLimiter from "./middleware/RateLimiter";
+import ThreadPool from "./threading/ThreadPool";
 
 export {
     HTTPServer,
@@ -27,5 +30,8 @@ export {
     RateLimitError,
     ErrorHandler,
     FileUpload,
-    SessionManager
+    SessionManager,
+    SwaggerManager,
+    RateLimiter,
+    ThreadPool
 };

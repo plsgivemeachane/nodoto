@@ -121,12 +121,12 @@ This project is licensed under the MIT License.
   - [ ] Add session-based authentication
   - [ ] Implement refresh token mechanism
 
-- [ ] Authorization Framework
+- [-] Authorization Framework
   - [x] Create role-based access control (RBAC)
   - [x] Implement permission-based authorization
   - [x] Add route-level authorization middleware
   - [x] Create resource-level access control
-  - [ ] Add role hierarchy support
+  - [x] Add role hierarchy support
 
 ### Data Management
 - [-] Database Integration
@@ -168,40 +168,35 @@ This project is licensed under the MIT License.
   - [x] Add development/production error modes
 
 ### Performance & Scaling
-- [ ] Threading Support
-  - [ ] Implement worker threads
-  - [ ] Create thread pool manager
+- [-] Threading Support
+  - [x] Implement worker threads
+  - [x] Create thread pool manager
   - [ ] Add task queue system
-  - [ ] Implement thread communication
-  - [ ] Add thread monitoring
+  - [x] Implement thread communication
+  - [x] Add thread monitoring
 
-### Templates
-- [ ] One-Line Templates (~20 templates, each making setup a one-liner without touching `package.json`)
-  - [ ] Hello World template
-  - [ ] REST API template
-  - [ ] Auth (JWT) template
-  - [ ] Auth (OAuth2) template
-  - [ ] RBAC template
-  - [ ] Session-based auth template
-  - [ ] File upload template
-  - [ ] WebSocket template
-  - [ ] Redis cache template
-  - [ ] MongoDB template
-  - [ ] PostgreSQL template
-  - [ ] Swagger docs template
-  - [ ] Health check template
-  - [ ] Request validation template
-  - [ ] Error handling template
-  - [ ] Worker threads template
-  - [ ] Logging template
-  - [ ] CORS template
-  - [ ] Rate limiting template
-  - [ ] Full-stack starter template
+### Templates (Prebuilt Servers)
+Prebuilt server templates combining multiple modules into ready-to-run examples.
+- [x] Echo Server — minimal server that echoes requests back
+- [x] Full User Pipeline — register, login (JWT), RBAC, session, validation, error handling
+- [x] REST API Server — CRUD resource with validation, error handling, CORS, logging
+- [ ] File Upload Server — multipart uploads with size/type validation and file listing
+- [ ] Realtime Server — WebSocket-based realtime communication
+- [x] Cached API Server — Redis-backed caching layer for API responses
+- [ ] Health Check Server — health endpoints with system metrics
+- [ ] Auth Gateway — authentication gateway with JWT + session + RBAC
+- [x] Rate Limited Server — rate limiting + request validation + error handling
+- [x] Worker Thread Server — CPU-bound task offloading via worker threads
+- [ ] Swagger Documented Server — full API with auto-generated Swagger docs
+- [x] Microservice Starter — minimal service with health check, logging, and error handling
+- [ ] Session-Based App — express-session + Redis store + auth middleware
+- [ ] Multi-Database Server — Redis cache + MongoDB/PostgreSQL persistence
+- [ ] Full-Stack Starter — everything combined: auth, RBAC, validation, upload, sessions, logging, docs
 
 ### Documentation & Monitoring
-- [ ] Swagger Documentation
-  - [ ] Set up Swagger UI
-  - [ ] Implement automatic route documentation
+- [-] Swagger Documentation
+  - [x] Set up Swagger UI
+  - [x] Implement automatic route documentation
   - [ ] Add schema documentation
   - [ ] Create API versioning system
   - [ ] Implement documentation testing

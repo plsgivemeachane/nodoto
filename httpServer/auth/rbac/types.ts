@@ -9,6 +9,7 @@ export interface RBACRule {
 export interface Role {
     name: string;
     rules: RBACRule[];
+    inherits?: string[]; // Role hierarchy: this role inherits all permissions from named roles
 }
 
 export interface User {
