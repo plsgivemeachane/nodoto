@@ -33,7 +33,7 @@
     "express-session": "^1.19.0",
     "http": "^0.0.1-security",
     "joi": "^18.2.3",
-    "multer": "^2.2.0",
+    "multer": "^2.4.0",
     "nodejs-snowflake": "^2.0.1",
     "quanvnjwt": "^1.0.1",
     "redis": "^4.7.0",
