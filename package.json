@@ -32,7 +32,7 @@
     "express-rate-limit": "^8.6.1",
     "express-session": "^1.19.0",
     "http": "^0.0.1-security",
-    "joi": "^18.2.6",
+    "joi": "^18.2.9",
     "multer": "^2.2.0",
     "nodejs-snowflake": "^2.0.1",
     "quanvnjwt": "^1.0.1",
